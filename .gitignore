@@ -1,0 +1,32 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# SQLite Database files
+*.db
+*.db-journal
+*.sqlite3
+
+# Environment files (secrets)
+.env
+.env.*
+secrets.json
+
+# IDE / System configurations
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch and Temp files
+scratch/
+temp/
+tmp/

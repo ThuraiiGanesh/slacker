@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncUp AI | Gradeline AI Group Dashboard</title>
+    <!-- Google Fonts: Outfit and Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    
+    <!-- Login Landing Page -->
+    <div id="login-page" class="login-wrapper">
+        <span class="sparkle-decal" style="top: 15%; left: 10%; font-size: 24px;">✨</span>
+        <span class="sparkle-decal" style="top: 25%; right: 12%; font-size: 20px;">🌸</span>
+        <span class="sparkle-decal" style="bottom: 18%; left: 15%; font-size: 22px;">🎀</span>
+        <span class="sparkle-decal" style="bottom: 25%; right: 10%; font-size: 24px;">✨</span>
+        <span class="sparkle-decal" style="top: 45%; left: 5%; font-size: 18px;">💛</span>
+        
+        <div class="card login-card">
+            <div class="login-header">
+                <!-- SVG Mascot Syncie -->
+                <div class="mascot-container mascot-bounce-anim" style="width: 100px; height: 100px; margin-bottom: 12px;">
+                    <svg class="mascot-svg" viewBox="0 0 90 90">
+                        <!-- Ears -->
+                        <g class="mascot-ear-left">
+                            <ellipse cx="32" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffccd5" stroke-width="2.5" />
+                            <ellipse cx="32" cy="24" rx="3.5" ry="11" fill="#ffe5ec" />
+                        </g>
+                        <g class="mascot-ear-right">
+                            <ellipse cx="58" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffccd5" stroke-width="2.5" />
+                            <ellipse cx="58" cy="24" rx="3.5" ry="11" fill="#ffe5ec" />
+                        </g>
+                        <!-- Body Base -->
+                        <circle cx="45" cy="55" r="23" class="mascot-body-base" />
+                        <!-- Head Blush -->
+                        <ellipse cx="28" cy="59" rx="5" ry="2.5" class="mascot-blush" />
+                        <ellipse cx="62" cy="59" rx="5" ry="2.5" class="mascot-blush" />
+                        <!-- Eyes -->
+                        <ellipse cx="35" cy="53" rx="2.5" ry="3.5" fill="#3d3a45" class="mascot-eye" />
+                        <ellipse cx="55" cy="53" rx="2.5" ry="3.5" fill="#3d3a45" class="mascot-eye" />
+                        <path d="M35 50.5 Q36 49.5 37 50.5" stroke="#ff85a1" stroke-width="1.2" fill="none" />
+                        <path d="M55 50.5 Q54 49.5 53 50.5" stroke="#ff85a1" stroke-width="1.2" fill="none" />
+                        <!-- Mouth -->
+                        <path d="M43 57.5 Q45 59 47 57.5" stroke="#ff85a1" stroke-width="2" fill="none" stroke-linecap="round" />
+                        <!-- Ribbon Bow -->
+                        <g class="mascot-bow-ribbon">
+                            <circle cx="45" cy="67" r="4" />
+                            <!-- Left bow wing -->
+                            <path d="M45 67 C38 60 35 72 45 67 Z" />
+                            <!-- Right bow wing -->
+                            <path d="M45 67 C52 60 55 72 45 67 Z" />
+                            <!-- Ribbon tails -->
+                            <path d="M43 68 L39 74" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" />
+                            <path d="M47 68 L51 74" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" />
+                        </g>
+                    </svg>
+                </div>
+                <h2>SyncUp <span>AI</span></h2>
+                <p class="tagline">Sign in to Gradeline Workspace</p>
+            </div>
+
+            
+            <!-- Step 1: Username Request -->
+            <form id="login-step1-form" class="login-form">
+                <p class="form-instructions">Enter your Telegram username to authenticate. We'll send a secure 6-digit OTP verification code to your chat with the bot.</p>
+                <div class="form-group">
+                    <label for="login-username">Telegram Username</label>
+                    <div class="input-wrapper">
+                        <span class="input-prefix">@</span>
+                        <input type="text" id="login-username" placeholder="e.g., username" required>
+                    </div>
+                    <span class="notice-help">⚠️ Make sure you have started a chat with the bot on Telegram first. <a href="#" target="_blank" id="bot-username-link">Open Bot Chat</a></span>
+                </div>
+                <div id="login-error-1" class="login-error hidden"></div>
+                <button type="submit" id="btn-send-otp" class="btn-gradient btn-full">Send Verification Code 🔑</button>
+            </form>
+            
+            <!-- Step 2: OTP Verification -->
+            <form id="login-step2-form" class="login-form hidden">
+                <p class="form-instructions">A verification code has been sent to your Telegram account. Enter it below to complete sign in.</p>
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="login-otp">6-Digit Verification Code</label>
+                    <input type="text" id="login-otp" placeholder="123456" maxlength="6" pattern="\d{6}" required style="text-align: center; font-size: 22px; letter-spacing: 8px; font-weight: bold; padding: 14px;">
+                </div>
+                <div id="login-error-2" class="login-error hidden"></div>
+                <button type="submit" id="btn-verify-otp" class="btn-accent btn-full">Verify & Access Dashboard 🔓</button>
+                <div class="form-back-actions">
+                    <button type="button" id="btn-back-step1" class="btn-link">Back to Username</button>
+                    <button type="button" id="btn-resend-otp" class="btn-link">Resend Code</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Wrapper (Hidden until logged in) -->
+    <div id="app-wrapper" class="hidden">
+        <header class="header">
+            <div class="logo-area" style="flex-direction: row; align-items: center; gap: 8px;">
+                <!-- Mini SVG Mascot Syncie -->
+                <div class="mascot-container" style="width: 42px; height: 42px; cursor: pointer;">
+                    <svg class="mascot-svg" viewBox="0 0 90 90">
+                        <!-- Ears -->
+                        <g class="mascot-ear-left">
+                            <ellipse cx="32" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffccd5" stroke-width="2.5" />
+                            <ellipse cx="32" cy="24" rx="3.5" ry="11" fill="#ffe5ec" />
+                        </g>
+                        <g class="mascot-ear-right">
+                            <ellipse cx="58" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffccd5" stroke-width="2.5" />
+                            <ellipse cx="58" cy="24" rx="3.5" ry="11" fill="#ffe5ec" />
+                        </g>
+                        <!-- Body Base -->
+                        <circle cx="45" cy="55" r="23" class="mascot-body-base" />
+                        <!-- Head Blush -->
+                        <ellipse cx="28" cy="59" rx="5" ry="2.5" class="mascot-blush" />
+                        <ellipse cx="62" cy="59" rx="5" ry="2.5" class="mascot-blush" />
+                        <!-- Eyes -->
+                        <circle cx="35" cy="53" r="3.5" fill="#3d3a45" class="mascot-eye" />
+                        <circle cx="55" cy="53" r="3.5" fill="#3d3a45" class="mascot-eye" />
+                        <!-- Mouth -->
+                        <path d="M43 57.5 Q45 59 47 57.5" stroke="#ff85a1" stroke-width="2" fill="none" stroke-linecap="round" />
+                        <!-- Ribbon Bow -->
+                        <g class="mascot-bow-ribbon">
+                            <circle cx="45" cy="67" r="4" />
+                            <path d="M45 67 C38 60 35 72 45 67 Z" />
+                            <path d="M45 67 C52 60 55 72 45 67 Z" />
+                        </g>
+                    </svg>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <h1 style="margin: 0; line-height: 1.1;">SyncUp <span>AI</span></h1>
+                    <p class="tagline" style="margin: 0;">Gradeline AI Group Workspace</p>
+                </div>
+            </div>
+
+            
+            <div class="nav-controls">
+                <span id="user-profile-display" class="user-profile-display" style="font-weight: 500; font-size: 13.5px; color: var(--text-secondary); margin-right: 8px;"></span>
+                <div class="dropdown-wrapper">
+                    <label for="group-selector">Active Group:</label>
+                    <select id="group-selector">
+                        <option value="" disabled selected>Select a group chat...</option>
+                    </select>
+                </div>
+                <button id="btn-refresh" class="btn-icon" title="Refresh Dashboard">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                </button>
+                <button id="btn-logout" class="btn-secondary btn-sm" style="border-radius: 30px;">Logout</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Error Alert / Warning -->
+            <div id="no-group-alert" class="alert-box">
+                <h3>🤖 Welcome to Gradeline SyncUp AI!</h3>
+                <p>To view your live dashboard, add the Telegram bot to a group chat and send a message. Then, select your group from the dropdown menu above.</p>
+            </div>
+
+            <div id="dashboard-grid" class="grid-container hidden">
+                <!-- Group Health Alert Banner -->
+                <div id="group-health-banner" class="card col-12 alert-banner hidden">
+                    <span class="icon">⚠️</span>
+                    <div class="banner-text">
+                        <strong>Ghosting Risk Alert:</strong> <span id="health-banner-text"></span>
+                    </div>
+                </div>
+
+                <!-- Hero Stats Row (Col 4, Col 4, Col 4) -->
+                <div class="card col-4 stat-card">
+                    <div class="card-header">
+                        <h3>Project Completion</h3>
+                        <span class="icon">📈</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="circular-progress">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring__background" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                <circle id="task-progress-ring" class="progress-ring__bar" stroke="#8b5cf6" stroke-width="8" stroke-dasharray="314.16" stroke-dashoffset="314.16" fill="transparent" r="50" cx="60" cy="60"/>
+                            </svg>
+                            <div id="task-progress-text" class="progress-value">0%</div>
+                        </div>
+                        <div class="stat-meta">
+                            <span id="stat-tasks-ratio">0 of 0 tasks completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card col-4 vibe-card">
+                    <div class="card-header">
+                        <h3>Group Vibe Index</h3>
+                        <span class="icon">💬</span>
+                    </div>
+                    <div class="vibe-container">
+                        <div id="vibe-orb" class="vibe-orb idle"></div>
+                        <div class="vibe-info">
+                            <h4 id="vibe-status">Calm / Productive</h4>
+                            <p id="vibe-description">No stress triggers detected in recent chat communications. Keep executing!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card col-4 leaderboard-card">
+                    <div class="card-header">
+                        <h3>Reliability Scores</h3>
+                        <span class="icon">🏆</span>
+                    </div>
+                    <div class="leaderboard-container">
+                        <ul id="leaderboard-list" class="leaderboard-list">
+                            <!-- Loaded dynamically -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Content Area: Left (Deliverables & Nudge logs), Right (Rubric parsing & Standups) -->
+                <!-- Deliverables Panel -->
+                <div class="card col-8 tasks-card">
+                    <div class="card-header">
+                        <h3>Project Deliverables Board</h3>
+                        <div class="card-actions">
+                            <button id="btn-add-task-modal" class="btn-secondary btn-sm">+ Add Task</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="tasks-table">
+                            <thead>
+                                <tr>
+                                    <th width="10%">ID</th>
+                                    <th width="40%">Description</th>
+                                    <th width="20%">Assignee</th>
+                                    <th width="15%">Due Date</th>
+                                    <th width="15%">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasks-table-body">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Standup Summary Panel -->
+                <div class="card col-4 standup-card">
+                    <div class="card-header">
+                        <h3>AI Standup Summary</h3>
+                        <button id="btn-refresh-standup" class="btn-link">Regenerate ⚡</button>
+                    </div>
+                    <div class="standup-body">
+                        <div id="standup-loader" class="loader hidden">Compiling team decisions...</div>
+                        <div id="standup-content" class="standup-list">
+                            <!-- Loaded dynamically -->
+                            <p class="muted">Click "Regenerate" to summarize the last group discussions.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rubric Parser & Draft Auditor Panel -->
+                <div class="card col-7 rubric-card">
+                    <div class="tab-header">
+                        <button class="tab-btn active" data-tab="rubric-parser">AI Rubric Task Parser</button>
+                        <button class="tab-btn" data-tab="draft-auditor">AI Pre-Submission Auditor</button>
+                    </div>
+                    <div class="tab-content" style="padding-top: 15px;">
+                        <!-- Rubric Parser Tab -->
+                        <div id="tab-rubric-parser" class="tab-pane active">
+                            <div class="rubric-body">
+                                <p class="section-desc">Paste raw assignment rubric or syllabus text below. The AI will extract deliverables for preview.</p>
+                                <textarea id="rubric-input" placeholder="Paste assignment brief, PDF contents, or grading rubric lines here... e.g.
+Assignment 1 deliverables:
+- Database schema structure (Due: Week 2)
+- Fast API routes implementation (Due: Week 3)
+- Frontend dashboard deployment (Due: Week 4)"></textarea>
+                                
+                                <div class="form-actions">
+                                    <button id="btn-analyze-rubric" class="btn-gradient">Extract Deliverables 🪄</button>
+                                </div>
+
+                                <!-- Parsed Deliverables Preview -->
+                                <div id="rubric-preview-section" class="preview-section hidden">
+                                    <h4>🔍 Extracted Deliverables Preview</h4>
+                                    <ul id="parsed-tasks-list" class="parsed-tasks-list">
+                                        <!-- Rendered dynamically -->
+                                    </ul>
+                                    <div class="sync-actions">
+                                        <button id="btn-sync-tasks" class="btn-accent">Sync & Broadcast to Group Chat 🚀</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Draft Auditor Tab -->
+                        <div id="tab-draft-auditor" class="tab-pane">
+                            <div class="rubric-body">
+                                <p class="section-desc">Paste your group project draft or report below. Gemini AI will audit it against all deliverables in your deliverables board.</p>
+                                <textarea id="draft-input" placeholder="Paste your draft report, codebase description, or essay text here for immediate rubric compliance grading..."></textarea>
+                                
+                                <div class="form-actions">
+                                    <button id="btn-audit-draft" class="btn-gradient">Audit Draft Document 🔍</button>
+                                </div>
+
+                                <!-- Auditor Results Preview -->
+                                <div id="audit-results-section" class="preview-section hidden" style="margin-top: 20px;">
+                                    <h4>📋 AI Rubric Compliance Audit Report</h4>
+                                    <div class="audit-summary-box" style="margin-bottom: 15px; padding: 15px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--accent);">
+                                        <div style="font-weight: 700; margin-bottom: 5px;">Status: <span id="audit-summary-status" style="color: var(--accent-light);">Loading...</span></div>
+                                        <p id="audit-summary-guidance" style="font-size: 13.5px; margin: 0; line-height: 1.5; color: var(--text-secondary);"></p>
+                                    </div>
+                                    <ul id="audit-deliverables-list" class="parsed-tasks-list">
+                                        <!-- Rendered dynamically -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs, Nudges & Export Receipt -->
+                <div class="card col-5 telemetry-card">
+                    <div class="tab-header">
+                        <button class="tab-btn active" data-tab="nudges">Friction / Nudges Log</button>
+                        <button class="tab-btn" data-tab="peer-reviews">Peer Reviews</button>
+                        <button class="tab-btn" data-tab="receipt">Receipt Export</button>
+                    </div>
+                    <div class="tab-content">
+                        <!-- Nudges Log Tab -->
+                        <div id="tab-nudges" class="tab-pane active">
+                            <div class="nudges-timeline-wrapper">
+                                <ul id="nudges-timeline" class="nudges-timeline">
+                                    <!-- Loaded dynamically -->
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Peer Reviews Tab -->
+                        <div id="tab-peer-reviews" class="tab-pane">
+                            <div class="peer-reviews-timeline-wrapper">
+                                <ul id="peer-reviews-list" class="peer-reviews-list">
+                                    <!-- Loaded dynamically -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Receipt Export Tab -->
+                        <div id="tab-receipt" class="tab-pane">
+                            <p class="section-desc">Generate a secure contribution receipt for your course professor.</p>
+                            <div class="receipt-preview-box">
+                                <pre id="receipt-content">Loading receipt details...</pre>
+                            </div>
+                            <button id="btn-copy-receipt" class="btn-secondary btn-full">Copy Markdown Receipt 📋</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Add Task Modal -->
+        <div id="task-modal" class="modal">
+            <div class="modal-content card">
+                <div class="modal-header">
+                    <h3>Create New Task</h3>
+                    <span id="btn-close-modal" class="close-btn">&times;</span>
+                </div>
+                <form id="add-task-form">
+                    <div class="form-group">
+                        <label for="task-desc">Task Description *</label>
+                        <input type="text" id="task-desc" placeholder="e.g., Implement index routing and controllers" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-due">Due Date (Optional)</label>
+                        <input type="text" id="task-due" placeholder="e.g., 2026-06-20 or Week 2">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-blocked-by">Blocked By Task (Optional)</label>
+                        <select id="task-blocked-by">
+                            <option value="">No blocker (unblocked)</option>
+                        </select>
+                    </div>
+                    <div class="form-actions" style="margin-top: 20px;">
+                        <button type="submit" class="btn-gradient">Add Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Peer Review Modal -->
+        <div id="peer-review-modal" class="modal">
+            <div class="modal-content card">
+                <div class="modal-header">
+                    <h3>Rate & Review Teammate</h3>
+                    <span id="btn-close-review-modal" class="close-btn">&times;</span>
+                </div>
+                <form id="peer-review-form">
+                    <input type="hidden" id="review-reviewee-id">
+                    <div class="form-group">
+                        <label>Teammate</label>
+                        <input type="text" id="review-reviewee-name" readonly style="background: rgba(255, 255, 255, 0.95); border: 1.5px solid rgba(255, 182, 193, 0.3); color: var(--text-secondary); padding: 12px; border-radius: 12px; outline: none; width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>Collaboration & Contribution (1-5 Stars)</label>
+                        <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5" required /><label for="star5" title="5 stars">★</label>
+                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
+                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
+                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
+                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-feedback">Feedback / Comments *</label>
+                        <textarea id="review-feedback" placeholder="Describe their contribution and collaboration quality..." required style="min-height: 80px; width: 100%; border: 1.5px solid rgba(255, 182, 193, 0.3); border-radius: 12px; padding: 12px; background: rgba(255, 255, 255, 0.95); color: var(--text-primary); outline: none;"></textarea>
+                    </div>
+                    <div class="form-actions" style="margin-top: 20px;">
+                        <button type="submit" class="btn-gradient">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2026 SyncUp AI - Smart Chat Accountability Companion. Built for Hackathon Demo.</p>
+        </footer>
+    </div>
+
+    <!-- Mascot Chatbot Floating Widget -->
+    <div class="chatbot-widget-container">
+        <div id="chatbot-launcher" class="chatbot-launcher" title="Ask Syncie! 🎀">
+            <div id="chatbot-badge" class="notification-badge">1</div>
+        </div>
+        <div id="chatbot-panel" class="chatbot-panel">
+            <div class="chatbot-header">
+                <div class="chatbot-header-info">
+                    <div class="chatbot-header-avatar">🐰</div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 14px; font-weight: 700;">Syncie 🎀</h4>
+                        <span style="font-size: 10px; opacity: 0.9;">Preppy AI Helper</span>
+                    </div>
+                </div>
+                <span id="chatbot-close" class="chatbot-close">&times;</span>
+            </div>
+            <div id="chatbot-messages" class="chatbot-messages">
+                <div class="chat-msg mascot">
+                    <p>🎀 <b>Hi there, friend!</b> 🌸</p>
+                    <p>I'm <b>Syncie</b>, your preppy accountability helper! 🐰✨ Ask me anything about:</p>
+                    <ul>
+                        <li>📝 Telegram commands & how to claim/complete tasks</li>
+                        <li>🤫 Sending anonymous reminders (nudges)</li>
+                        <li>🚨 Managing workload stress with SOS</li>
+                        <li>💬 How Vibe Check sentiment moderation works</li>
+                        <li>🏆 Gaining XP and exporting grade receipts</li>
+                    </ul>
+                    <p>What can I help you sync up today? 🌼💛</p>
+                </div>
+            </div>
+            <div class="chatbot-input-container">
+                <input type="text" id="chatbot-input" placeholder="Type a message to Syncie... 🎀">
+                <button id="chatbot-send" class="chatbot-send">💖</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
+
