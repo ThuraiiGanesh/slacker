@@ -1564,5 +1564,207 @@ body {
     color: var(--accent-pink);
 }
 
+/* Bot Commands Section Styles */
+.commands-filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.command-search-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid rgba(255, 182, 193, 0.4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    transition: all var(--transition-speed);
+}
+
+.command-search-input:focus {
+    border-color: var(--accent-pink);
+    box-shadow: 0 0 8px rgba(255, 133, 161, 0.25);
+}
+
+.command-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-pill {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1.5px solid rgba(255, 182, 193, 0.3);
+    color: var(--text-secondary);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: all var(--transition-speed);
+}
+
+.filter-pill:hover {
+    background: rgba(255, 182, 193, 0.15);
+    border-color: var(--accent-pink);
+    color: var(--text-primary);
+}
+
+.filter-pill.active {
+    background: var(--accent-pink);
+    border-color: var(--accent-pink);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(255, 133, 161, 0.25);
+}
+
+.commands-list-wrapper {
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.commands-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.command-card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1.5px solid rgba(255, 182, 193, 0.25);
+    border-radius: 14px;
+    padding: 14px;
+    transition: all var(--transition-speed);
+    position: relative;
+}
+
+.command-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 4px 12px rgba(255, 133, 161, 0.08);
+}
+
+.command-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.command-trigger-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.command-trigger {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    background: rgba(255, 182, 193, 0.12);
+    border: 1px solid rgba(255, 182, 193, 0.25);
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.command-trigger:hover {
+    background: rgba(255, 182, 193, 0.25);
+    border-color: var(--accent-pink);
+    color: var(--accent-pink);
+}
+
+.command-trigger:active {
+    transform: scale(0.95);
+}
+
+.btn-copy-cmd {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: color 0.2s;
+    opacity: 0.7;
+}
+
+.btn-copy-cmd:hover {
+    color: var(--accent-pink);
+    opacity: 1;
+}
+
+.command-badges {
+    display: flex;
+    gap: 4px;
+}
+
+.command-badge {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.command-badge.type-slash {
+    background: rgba(183, 156, 237, 0.12);
+    border: 1px solid rgba(183, 156, 237, 0.25);
+    color: #7b4ec2;
+}
+
+.command-badge.type-nlp {
+    background: rgba(255, 209, 102, 0.12);
+    border: 1px solid rgba(255, 209, 102, 0.25);
+    color: #b57c00;
+}
+
+.command-badge.scope-chat {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #059669;
+}
+
+.command-badge.scope-dm {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+}
+
+.command-badge.scope-both {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: #2563eb;
+}
+
+.command-desc {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+
+.command-example {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border-left: 2px solid var(--accent-pink);
+    display: inline-block;
+}
+
 
 

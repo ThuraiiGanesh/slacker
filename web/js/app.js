@@ -7,6 +7,142 @@ let currentTasks = [];
 let parsedTasks = [];
 let currentUser = null;
 
+const BOT_COMMANDS = [
+    {
+        trigger: '/start',
+        type: 'slash',
+        scope: 'both',
+        desc: 'Displays the welcoming onboarding guide and lists command configurations.',
+        example: '/start'
+    },
+    {
+        trigger: '/help',
+        type: 'slash',
+        scope: 'both',
+        desc: 'Shows help resources, bot instructions, and links.',
+        example: '/help'
+    },
+    {
+        trigger: '/analyze [rubric_text]',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Paste assignment text, rubrics, or reply to a message containing a rubric to parse key deliverables using Gemini AI.',
+        example: '/analyze Assignment 1: Code a database by Friday.'
+    },
+    {
+        trigger: '/tasks',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Retrieves all active project deliverables with interactive inline buttons to claim or complete them.',
+        example: '/tasks'
+    },
+    {
+        trigger: '/claim [task_id]',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Claim a task deliverable by ID and assign it to yourself.',
+        example: '/claim 3'
+    },
+    {
+        trigger: '/complete [task_id]',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Mark a claimed task deliverable as completed and receive +10 Reliability Points (XP).',
+        example: '/complete 3'
+    },
+    {
+        trigger: '/sos [task_id]',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Workload backup helper: releases a claimed task back to the team pool when you are overwhelmed.',
+        example: '/sos 3'
+    },
+    {
+        trigger: '/nudge [task_id]',
+        type: 'slash',
+        scope: 'dm',
+        desc: 'Sends a gentle, anonymous reminder to a teammate currently assigned to that task. Must be sent in private DM to ensure anonymity.',
+        example: '/nudge 2'
+    },
+    {
+        trigger: '/standup',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Generates a quick, event-driven status summary of the team\'s latest group chat discussion using Gemini.',
+        example: '/standup'
+    },
+    {
+        trigger: '/stats',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Displays the group contribution leaderboard showing teammate reliability points.',
+        example: '/stats'
+    },
+    {
+        trigger: '/receipt',
+        type: 'slash',
+        scope: 'chat',
+        desc: 'Generates a secure markdown contribution receipt certifying individual task contributions.',
+        example: '/receipt'
+    },
+    {
+        trigger: 'show tasks',
+        type: 'nlp',
+        scope: 'chat',
+        desc: 'Natural Talk trigger to view the active list of project deliverables.',
+        example: 'what are the tasks'
+    },
+    {
+        trigger: 'I claim task [id]',
+        type: 'nlp',
+        scope: 'chat',
+        desc: 'Natural Talk trigger to claim a task deliverable by mentioning its ID.',
+        example: 'I will do task 3'
+    },
+    {
+        trigger: 'done with task [id]',
+        type: 'nlp',
+        scope: 'chat',
+        desc: 'Natural Talk trigger to mark a task completed.',
+        example: 'task 2 is complete'
+    },
+    {
+        trigger: 'I need backup on task [id]',
+        type: 'nlp',
+        scope: 'chat',
+        desc: 'Natural Talk trigger to release a task and trigger an SOS notification to the group.',
+        example: 'sos task 3'
+    },
+    {
+        trigger: 'standup summary',
+        type: 'nlp',
+        scope: 'chat',
+        desc: 'Natural Talk trigger to compile a standup log summary of team chat.',
+        example: 'brief us'
+    },
+    {
+        trigger: 'show leaderboard',
+        type: 'nlp',
+        scope: 'chat',
+        desc: 'Natural Talk trigger to view the reliability rankings.',
+        example: 'show stats'
+    },
+    {
+        trigger: 'project receipt',
+        type: 'nlp',
+        scope: 'chat',
+        desc: 'Natural Talk trigger to retrieve the contribution receipt.',
+        example: 'grade receipt'
+    },
+    {
+        trigger: 'nudge task [id]',
+        type: 'nlp',
+        scope: 'dm',
+        desc: 'Natural Talk trigger to send an anonymous peer check-in reminder. Send via DM to preserve anonymity.',
+        example: 'nudge teammate on task 3'
+    }
+];
+
 // DOM Elements
 const appWrapper = document.getElementById('app-wrapper');
 const loginPage = document.getElementById('login-page');
@@ -125,6 +261,7 @@ function handleUnauthorized() {
 // Initialize App
 document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
+    renderCommandGuide();
     await fetchBotInfo();
     await checkAuthSession();
 });
@@ -396,6 +533,24 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Command Guide Search and Filter
+    const commandSearch = document.getElementById('command-search');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    
+    if (commandSearch) {
+        commandSearch.addEventListener('input', () => {
+            renderCommandGuide();
+        });
+    }
+    
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            filterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            renderCommandGuide();
+        });
+    });
 }
 
 // Fetch registered groups
@@ -1170,5 +1325,92 @@ function appendChatbotMessage(sender, text) {
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
 
     return msgId;
+}
+
+function renderCommandGuide() {
+    const container = document.getElementById('commands-list-container');
+    if (!container) return;
+    
+    const searchVal = document.getElementById('command-search')?.value.toLowerCase().trim() || '';
+    const activeFilter = document.querySelector('.filter-pill.active')?.getAttribute('data-filter') || 'all';
+    
+    container.innerHTML = '';
+    
+    const filtered = BOT_COMMANDS.filter(cmd => {
+        // Filter by type
+        if (activeFilter !== 'all' && cmd.type !== activeFilter) {
+            return false;
+        }
+        // Filter by search text
+        if (searchVal) {
+            const inTrigger = cmd.trigger.toLowerCase().includes(searchVal);
+            const inDesc = cmd.desc.toLowerCase().includes(searchVal);
+            const inExample = cmd.example.toLowerCase().includes(searchVal);
+            return inTrigger || inDesc || inExample;
+        }
+        return true;
+    });
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="muted">No commands found matching criteria. 🌸</p>';
+        return;
+    }
+    
+    filtered.forEach(cmd => {
+        const card = document.createElement('div');
+        card.className = 'command-card';
+        
+        let typeClass = cmd.type === 'slash' ? 'type-slash' : 'type-nlp';
+        let typeText = cmd.type === 'slash' ? 'Slash' : 'Natural Talk';
+        
+        let scopeClass = cmd.scope === 'chat' ? 'scope-chat' : (cmd.scope === 'dm' ? 'scope-dm' : 'scope-both');
+        let scopeText = cmd.scope === 'chat' ? '💬 Group' : (cmd.scope === 'dm' ? '🤫 Private DM' : '🌍 Group & DM');
+        
+        card.innerHTML = `
+            <div class="command-card-header">
+                <div class="command-trigger-container">
+                    <span class="command-trigger" title="Click to copy trigger">${cmd.trigger}</span>
+                    <button class="btn-copy-cmd" title="Copy trigger">
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                    </button>
+                </div>
+                <div class="command-badges">
+                    <span class="command-badge ${typeClass}">${typeText}</span>
+                    <span class="command-badge ${scopeClass}">${scopeText}</span>
+                </div>
+            </div>
+            <p class="command-desc">${cmd.desc}</p>
+            <div class="command-example">
+                e.g., <span class="copy-example" style="cursor:pointer; text-decoration: underline dotted;" title="Click to copy example">${cmd.example}</span>
+            </div>
+        `;
+        
+        // Add copy-to-clipboard functionality
+        const triggerEl = card.querySelector('.command-trigger');
+        const copyBtn = card.querySelector('.btn-copy-cmd');
+        const exampleEl = card.querySelector('.copy-example');
+        
+        const copyAction = (text, elementToAnimate) => {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalBg = elementToAnimate.style.background;
+                const originalColor = elementToAnimate.style.color;
+                elementToAnimate.style.background = 'rgba(16, 185, 129, 0.15)';
+                elementToAnimate.style.color = '#10b981';
+                setTimeout(() => {
+                    elementToAnimate.style.background = originalBg;
+                    elementToAnimate.style.color = originalColor;
+                }, 1000);
+            }).catch(err => console.error(err));
+        };
+        
+        triggerEl.addEventListener('click', () => copyAction(cmd.trigger, triggerEl));
+        exampleEl.addEventListener('click', () => copyAction(cmd.example, exampleEl));
+        copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyAction(cmd.trigger, copyBtn);
+        });
+        
+        container.appendChild(card);
+    });
 }
 

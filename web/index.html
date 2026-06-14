@@ -324,6 +324,7 @@ Assignment 1 deliverables:
                         <button class="tab-btn active" data-tab="nudges">Friction / Nudges Log</button>
                         <button class="tab-btn" data-tab="peer-reviews">Peer Reviews</button>
                         <button class="tab-btn" data-tab="receipt">Receipt Export</button>
+                        <button class="tab-btn" data-tab="bot-commands">Bot Commands</button>
                     </div>
                     <div class="tab-content">
                         <!-- Nudges Log Tab -->
@@ -351,6 +352,23 @@ Assignment 1 deliverables:
                                 <pre id="receipt-content">Loading receipt details...</pre>
                             </div>
                             <button id="btn-copy-receipt" class="btn-secondary btn-full">Copy Markdown Receipt 📋</button>
+                        </div>
+
+                        <!-- Bot Commands Tab -->
+                        <div id="tab-bot-commands" class="tab-pane">
+                            <div class="commands-filter-row">
+                                <input type="text" id="command-search" placeholder="Search commands... 🎀" class="command-search-input">
+                                <div class="command-filters">
+                                    <button class="filter-pill active" data-filter="all">All</button>
+                                    <button class="filter-pill" data-filter="slash">Slash</button>
+                                    <button class="filter-pill" data-filter="nlp">Natural</button>
+                                </div>
+                            </div>
+                            <div class="commands-list-wrapper">
+                                <div class="commands-list" id="commands-list-container">
+                                    <!-- Rendered dynamically by JS -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
