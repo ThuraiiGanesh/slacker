@@ -1,22 +1,23 @@
-/* Theme Variables - Sleek Dark Mode Glassmorphism (Preppy Cyber-Lilac Theme) */
+/* Theme Variables - Preppy Pink Glassmorphism */
 :root {
-    --bg-main: #06050b; /* Deep Obsidian Black */
-    --bg-card: rgba(18, 14, 30, 0.65); /* Frosted Dark Violet Glass */
-    --border-card: rgba(255, 117, 151, 0.12); /* Subtle Pink Accent Border */
-    --border-hover: rgba(255, 117, 151, 0.4); /* Neon Pink Border Glow */
+    --bg-main: #0d0616; /* Deep Pink-tinted Dark */
+    --bg-card: rgba(30, 15, 38, 0.72); /* Frosted Pink-Violet Glass */
+    --border-card: rgba(255, 117, 151, 0.18); /* Pink Accent Border */
+    --border-hover: rgba(255, 100, 160, 0.5); /* Bright Pink Border Glow */
     
-    --accent-purple: #c084fc; /* Vibrant Lilac */
-    --accent-purple-glow: rgba(192, 132, 252, 0.2);
+    --accent-purple: #d580ff; /* Vivid Lilac */
+    --accent-purple-glow: rgba(213, 128, 255, 0.25);
     --accent-indigo: #ffb3c1; /* Soft Pastel Pink */
     --accent-cyan: #38bdf8; /* Neon Sky Blue */
     --accent-cyan-glow: rgba(56, 189, 248, 0.25);
     --accent-pink: #f472b6; /* Hot Preppy Pink */
+    --accent-pink-bright: #ff4da6; /* Brighter Hot Pink */
     --accent-yellow: #fde047; /* Bright Butter Yellow */
     --accent-green: #34d399; /* Vibrant Mint Green */
     
-    --text-primary: #f3f4f6; /* Pure Off-White */
-    --text-secondary: #9ca3af; /* Light Lavender Gray */
-    --text-muted: #6b7280; /* Muted Slate Gray */
+    --text-primary: #fdf0f8; /* Warm off-white with pink tint */
+    --text-secondary: #c9a0bc; /* Lavender Rose */
+    --text-muted: #8a6880; /* Muted Rose Gray */
     
     --transition-speed: 0.35s;
 }
@@ -30,6 +31,11 @@
 
 body {
     background-color: var(--bg-main);
+    background-image: 
+        radial-gradient(ellipse at 20% 10%, rgba(255, 60, 140, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(200, 60, 255, 0.10) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(150, 20, 100, 0.06) 0%, transparent 70%);
+    background-attachment: fixed;
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
     font-size: 15px;
@@ -42,25 +48,25 @@ body {
 /* Background Glowing Ambient Orbs */
 .ambient-glow {
     position: fixed;
-    width: 50vw;
-    height: 50vw;
+    width: 60vw;
+    height: 60vw;
     border-radius: 50%;
     pointer-events: none;
     z-index: -1;
-    filter: blur(140px);
-    opacity: 0.45;
+    filter: blur(120px);
+    opacity: 0.7;
 }
 
 .glow-1 {
-    top: -10%;
-    left: -10%;
-    background: radial-gradient(circle, rgba(244, 114, 182, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+    top: -15%;
+    left: -15%;
+    background: radial-gradient(circle, rgba(255, 80, 160, 0.55) 0%, rgba(200, 40, 120, 0.15) 50%, rgba(0, 0, 0, 0) 70%);
 }
 
 .glow-2 {
-    bottom: -15%;
-    right: -10%;
-    background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+    bottom: -20%;
+    right: -15%;
+    background: radial-gradient(circle, rgba(192, 80, 255, 0.5) 0%, rgba(140, 40, 200, 0.15) 50%, rgba(0, 0, 0, 0) 70%);
 }
 
 /* Header Design - Premium YSP Style Floating Pill */
@@ -69,10 +75,10 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 12px 36px;
-    border: 1px solid var(--border-card);
-    background: rgba(15, 12, 25, 0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    border: 1.5px solid rgba(255, 120, 170, 0.25);
+    background: rgba(22, 8, 32, 0.82);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
     position: sticky;
     top: 20px;
     margin: 0 auto;
@@ -80,13 +86,13 @@ body {
     max-width: 1400px;
     border-radius: 100px;
     z-index: 100;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(255, 60, 140, 0.18), 0 2px 0 rgba(255, 180, 210, 0.1) inset;
     transition: all 0.3s ease;
 }
 
 .header:hover {
-    border-color: rgba(255, 117, 151, 0.25);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 100, 160, 0.4);
+    box-shadow: 0 12px 40px rgba(255, 60, 140, 0.25), 0 2px 0 rgba(255, 180, 210, 0.12) inset;
 }
 
 /* Floating Pill Navbar Links */
@@ -175,7 +181,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(20, 16, 33, 0.5);
+    background: rgba(22, 8, 34, 0.6);
     border: 1px solid var(--border-card);
     border-radius: 30px;
     padding: 6px 18px;
@@ -199,7 +205,7 @@ body {
 }
 
 .dropdown-wrapper select option {
-    background-color: #0f0d1a;
+    background-color: #180a28;
     color: var(--text-primary);
 }
 
@@ -230,21 +236,32 @@ body {
 
 /* Bento Cards - Translucent Glass */
 .card {
-    background: var(--bg-card);
+    background: rgba(28, 12, 42, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-card);
+    border: 1px solid rgba(255, 120, 170, 0.22);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(180, 20, 100, 0.15), inset 0 1px 1px rgba(255, 200, 220, 0.06);
     transition: all var(--transition-speed) cubic-bezier(0.2, 0.8, 0.2, 1);
     position: relative;
     overflow: hidden;
 }
 
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 150, 190, 0.4), transparent);
+    pointer-events: none;
+}
+
 .card:hover {
-    border-color: var(--border-hover);
-    box-shadow: 0 16px 40px rgba(255, 117, 151, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 100, 160, 0.5);
+    box-shadow: 0 16px 40px rgba(255, 80, 150, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.08);
     transform: translateY(-4px);
 }
 
@@ -271,13 +288,13 @@ body {
 /* Alert Box */
 .alert-box {
     grid-column: span 12;
-    background: rgba(18, 14, 30, 0.8);
-    border: 1px dashed var(--border-hover);
+    background: rgba(25, 10, 40, 0.8);
+    border: 1px dashed rgba(255, 100, 160, 0.4);
     border-radius: 20px;
     padding: 40px;
     text-align: center;
     backdrop-filter: blur(12px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(180, 20, 100, 0.12);
 }
 
 .alert-box h3 {
@@ -592,8 +609,8 @@ body {
 /* Textareas & Inputs */
 textarea, .form-group input, select {
     width: 100%;
-    background: rgba(20, 16, 33, 0.6) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(30, 10, 45, 0.7) !important;
+    border: 1.5px solid rgba(255, 120, 170, 0.15) !important;
     border-radius: 12px;
     padding: 12px 16px;
     color: var(--text-primary) !important;
@@ -794,6 +811,71 @@ textarea {
     font-weight: 500;
 }
 
+/* Mascot SVG Colors - Critical: defines bunny body colors */
+.mascot-body-base {
+    fill: #ffffff;
+    filter: drop-shadow(0 4px 12px rgba(255, 182, 193, 0.4));
+}
+
+.mascot-blush {
+    fill: #ffb3c6;
+    opacity: 0.8;
+}
+
+.mascot-bow-ribbon {
+    fill: #ff4d8d;
+}
+
+.mascot-bow-ribbon circle {
+    fill: #ff4d8d;
+}
+
+.mascot-bow-ribbon path {
+    fill: #ff4d8d;
+}
+
+.mascot-eye {
+    fill: #3d3a45;
+}
+
+.mascot-ear-left ellipse:first-child,
+.mascot-ear-right ellipse:first-child {
+    fill: #ffffff;
+}
+
+.mascot-ear-left ellipse:last-child,
+.mascot-ear-right ellipse:last-child {
+    fill: #ffccd9;
+}
+
+.mascot-svg {
+    filter: drop-shadow(0 4px 16px rgba(255, 100, 160, 0.35));
+}
+
+/* Mascot bounce animation */
+@keyframes mascot-bounce {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-6px) rotate(-2deg); }
+    75% { transform: translateY(-3px) rotate(2deg); }
+}
+
+.mascot-bounce-anim .mascot-svg {
+    animation: mascot-bounce 3s ease-in-out infinite;
+}
+
+/* Sparkle decals */
+.sparkle-decal {
+    position: absolute;
+    animation: sparkle-float 4s ease-in-out infinite;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+@keyframes sparkle-float {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+    50% { transform: translateY(-8px) scale(1.1); opacity: 0.9; }
+}
+
 /* Login Page Styling */
 .login-wrapper {
     display: flex;
@@ -803,13 +885,17 @@ textarea {
     padding: 20px;
     z-index: 10;
     position: relative;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255, 60, 140, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(190, 60, 255, 0.1) 0%, transparent 50%);
 }
 
 .login-card {
     width: 100%;
     max-width: 450px;
     padding: 40px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 60px rgba(255, 60, 140, 0.2), 0 0 0 1px rgba(255, 120, 170, 0.15);
+    border-color: rgba(255, 120, 170, 0.25) !important;
+    background: rgba(25, 12, 35, 0.85) !important;
 }
 
 .login-header h2 {
@@ -878,8 +964,8 @@ textarea {
     right: 0;
     width: 350px;
     height: 480px;
-    background: rgba(18, 14, 30, 0.95);
-    border: 2px solid var(--border-hover);
+    background: rgba(20, 8, 32, 0.97);
+    border: 2px solid rgba(255, 100, 160, 0.35);
     border-radius: 24px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
     display: flex;
@@ -904,7 +990,7 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: rgba(10, 8, 18, 0.8);
+    background: rgba(12, 5, 22, 0.8);
 }
 
 .chat-msg.mascot {
@@ -1043,7 +1129,7 @@ textarea {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(18, 14, 30, 0.75);
+    background: rgba(25, 10, 40, 0.85);
     border: 1.5px solid var(--border-card);
     border-radius: 16px;
     padding: 8px 18px 8px 12px;
@@ -1118,7 +1204,7 @@ textarea {
     top: calc(100% + 10px);
     right: 0;
     min-width: 280px;
-    background: rgba(14, 10, 24, 0.95);
+    background: rgba(22, 8, 38, 0.97);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
     border: 1.5px solid rgba(255, 117, 151, 0.25);

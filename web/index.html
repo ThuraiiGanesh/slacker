@@ -25,40 +25,37 @@
         <div class="card login-card">
             <div class="login-header">
                 <!-- SVG Mascot Syncie -->
-                <div class="mascot-container mascot-bounce-anim" style="width: 100px; height: 100px; margin-bottom: 12px;">
-                    <svg class="mascot-svg" viewBox="0 0 90 90">
-                        <!-- Ears -->
-                        <g class="mascot-ear-left">
-                            <ellipse cx="32" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffccd5" stroke-width="2.5" />
-                            <ellipse cx="32" cy="24" rx="3.5" ry="11" fill="#ffe5ec" />
-                        </g>
-                        <g class="mascot-ear-right">
-                            <ellipse cx="58" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffccd5" stroke-width="2.5" />
-                            <ellipse cx="58" cy="24" rx="3.5" ry="11" fill="#ffe5ec" />
-                        </g>
-                        <!-- Body Base -->
-                        <circle cx="45" cy="55" r="23" class="mascot-body-base" />
-                        <!-- Head Blush -->
-                        <ellipse cx="28" cy="59" rx="5" ry="2.5" class="mascot-blush" />
-                        <ellipse cx="62" cy="59" rx="5" ry="2.5" class="mascot-blush" />
-                        <!-- Eyes -->
-                        <ellipse cx="35" cy="53" rx="2.5" ry="3.5" fill="#3d3a45" class="mascot-eye" />
-                        <ellipse cx="55" cy="53" rx="2.5" ry="3.5" fill="#3d3a45" class="mascot-eye" />
-                        <path d="M35 50.5 Q36 49.5 37 50.5" stroke="#ff85a1" stroke-width="1.2" fill="none" />
-                        <path d="M55 50.5 Q54 49.5 53 50.5" stroke="#ff85a1" stroke-width="1.2" fill="none" />
-                        <!-- Mouth -->
-                        <path d="M43 57.5 Q45 59 47 57.5" stroke="#ff85a1" stroke-width="2" fill="none" stroke-linecap="round" />
-                        <!-- Ribbon Bow -->
-                        <g class="mascot-bow-ribbon">
-                            <circle cx="45" cy="67" r="4" />
-                            <!-- Left bow wing -->
-                            <path d="M45 67 C38 60 35 72 45 67 Z" />
-                            <!-- Right bow wing -->
-                            <path d="M45 67 C52 60 55 72 45 67 Z" />
-                            <!-- Ribbon tails -->
-                            <path d="M43 68 L39 74" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" />
-                            <path d="M47 68 L51 74" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" />
-                        </g>
+                <div class="mascot-container mascot-bounce-anim" style="width: 110px; height: 110px; margin: 0 auto 16px; position: relative;">
+                    <svg class="mascot-svg" viewBox="0 0 90 90" style="width:100%;height:100%;">
+                        <!-- Glow circle behind bunny -->
+                        <circle cx="45" cy="55" r="30" fill="rgba(255,120,180,0.10)" />
+                        <!-- Ears (white with pink inner) -->
+                        <ellipse cx="32" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffb3c6" stroke-width="2" />
+                        <ellipse cx="32" cy="24" rx="3.5" ry="11" fill="#ffccd9" />
+                        <ellipse cx="58" cy="22" rx="7" ry="16" fill="#ffffff" stroke="#ffb3c6" stroke-width="2" />
+                        <ellipse cx="58" cy="24" rx="3.5" ry="11" fill="#ffccd9" />
+                        <!-- Body Base - Crisp White -->
+                        <circle cx="45" cy="55" r="23" fill="#ffffff" stroke="#ffd6e7" stroke-width="1.5" />
+                        <!-- Blush Cheeks - Soft Pink -->
+                        <ellipse cx="29" cy="59" rx="5" ry="2.5" fill="#ffb3c6" opacity="0.75" />
+                        <ellipse cx="61" cy="59" rx="5" ry="2.5" fill="#ffb3c6" opacity="0.75" />
+                        <!-- Eyes - Dark Charcoal -->
+                        <ellipse cx="36" cy="53" rx="2.5" ry="3" fill="#2d2438" />
+                        <ellipse cx="54" cy="53" rx="2.5" ry="3" fill="#2d2438" />
+                        <!-- Eye sparkles -->
+                        <circle cx="37.5" cy="51.5" r="0.8" fill="#ffffff" />
+                        <circle cx="55.5" cy="51.5" r="0.8" fill="#ffffff" />
+                        <!-- Eyelashes -->
+                        <path d="M34 50.5 Q35 49 36 50.5" stroke="#ff85a1" stroke-width="1" fill="none" />
+                        <path d="M54 50.5 Q53 49 52 50.5" stroke="#ff85a1" stroke-width="1" fill="none" />
+                        <!-- Smile -->
+                        <path d="M42 58 Q45 61 48 58" stroke="#ff6899" stroke-width="2" fill="none" stroke-linecap="round" />
+                        <!-- Bow at bottom - Hot Pink -->
+                        <circle cx="45" cy="69" r="3.5" fill="#ff4d8d" />
+                        <path d="M45 69 C36 61 33 74 45 69 Z" fill="#ff4d8d" />
+                        <path d="M45 69 C54 61 57 74 45 69 Z" fill="#ff4d8d" />
+                        <path d="M43 70 L38 77" stroke="#e8005a" stroke-width="2" stroke-linecap="round" />
+                        <path d="M47 70 L52 77" stroke="#e8005a" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </div>
                 <h2>SyncUp <span>AI</span></h2>
