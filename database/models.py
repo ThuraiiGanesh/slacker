@@ -2,7 +2,10 @@ import sqlite3
 from datetime import datetime
 import os
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "gradeline.db")
+DB_PATH = os.environ.get(
+    "DATABASE_PATH",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "gradeline.db")
+)
 
 def get_db_connection():
     """Returns a SQLite connection. Creates the database file if it does not exist."""

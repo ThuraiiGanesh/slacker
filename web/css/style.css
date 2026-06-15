@@ -63,20 +63,58 @@ body {
     background: radial-gradient(circle, rgba(255, 243, 176, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
 }
 
-/* Header Design */
+/* Header Design - YSP Style Floating Pill */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 40px;
-    border-bottom: 1.5px solid rgba(255, 182, 193, 0.35);
+    padding: 12px 32px;
+    border: 1.5px solid rgba(255, 182, 193, 0.35);
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: sticky;
-    top: 0;
+    top: 20px;
+    margin: 0 auto;
+    width: 95%;
+    max-width: 1400px;
+    border-radius: 100px;
     z-index: 100;
-    box-shadow: 0 4px 20px rgba(255, 182, 193, 0.1);
+    box-shadow: 0 8px 30px rgba(255, 182, 193, 0.15), inset 0 1px 1px #fff;
+    transition: all 0.3s ease;
+}
+
+/* Floating Pill Navbar Links */
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-link {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 50px;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    border: 1.5px solid transparent;
+}
+
+.nav-link:hover {
+    color: var(--accent-pink);
+    background: rgba(255, 182, 193, 0.12);
+}
+
+.nav-link.active {
+    color: var(--accent-pink);
+    background: rgba(255, 182, 193, 0.18);
+    border-color: rgba(255, 182, 193, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 182, 193, 0.15);
 }
 
 .logo-area {
@@ -1764,6 +1802,22 @@ body {
     border-radius: 6px;
     border-left: 2px solid var(--accent-pink);
     display: inline-block;
+}
+
+/* Sub-view transitions and layout style */
+.sub-view {
+    animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 

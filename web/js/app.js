@@ -302,6 +302,24 @@ function showDashboard() {
     const nameStr = currentUser.first_name + (currentUser.username ? ` (@${currentUser.username})` : '');
     userProfileDisplay.textContent = `👤 Hi, ${nameStr}`;
     
+    // Reset navbar active tab to Overview
+    const navLinks = document.querySelectorAll('.nav-link');
+    const subViews = document.querySelectorAll('.sub-view');
+    navLinks.forEach(l => {
+        if (l.getAttribute('data-view') === 'overview') {
+            l.classList.add('active');
+        } else {
+            l.classList.remove('active');
+        }
+    });
+    subViews.forEach(v => {
+        if (v.id === 'view-overview') {
+            v.classList.remove('hidden');
+        } else {
+            v.classList.add('hidden');
+        }
+    });
+    
     fetchGroups();
 }
 
@@ -549,6 +567,28 @@ function setupEventListeners() {
             filterPills.forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             renderCommandGuide();
+        });
+    });
+
+    // --- YSP Style Sub-View Navigation Switcher ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const subViews = document.querySelectorAll('.sub-view');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Set link to active
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            
+            // Hide all sub-views and show target sub-view
+            subViews.forEach(v => v.classList.add('hidden'));
+            const targetViewId = `view-${link.getAttribute('data-view')}`;
+            const targetView = document.getElementById(targetViewId);
+            if (targetView) {
+                targetView.classList.remove('hidden');
+            }
         });
     });
 }

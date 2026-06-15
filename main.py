@@ -137,6 +137,7 @@ async def shutdown_event():
         logger.info("Telegram Bot stopped.")
 
 if __name__ == "__main__":
-    # Host on all interfaces on port 8000
-    logger.info("Starting SyncUp AI FastAPI backend & Web server on http://localhost:8000")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
+    # Host on all interfaces on the port assigned by the system (fallback to 8000)
+    port = int(os.environ.get("PORT", 8000))
+    logger.info(f"Starting SyncUp AI FastAPI backend & Web server on http://0.0.0.0:{port}")
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

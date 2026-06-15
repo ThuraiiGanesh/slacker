@@ -14,6 +14,14 @@ def analyze_rubric(rubric_text: str) -> list:
     Parses a rubric or syllabus text into a list of structured deliverables using Gemini 1.5 Flash.
     Returns a list of dicts: [{'description': '...', 'due_date': '...'}]
     """
+    if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+        logger.warning("GEMINI_API_KEY not configured. Using local fallback rubric parser.")
+        return [
+            {"description": "Database schema structure design (Local Fallback)", "due_date": "Week 2"},
+            {"description": "FastAPI routes & controllers implementation (Local Fallback)", "due_date": "Week 3"},
+            {"description": "Frontend dashboard layout & connection (Local Fallback)", "due_date": "Week 4"}
+        ]
+
     system_prompt = (
         "You are an expert academic assistant that parses assignment briefs and rubrics into a clean list of individual, action-oriented deliverables.\n\n"
         "Analyze the provided rubric text and extract the exact deliverables.\n"
@@ -57,6 +65,14 @@ def generate_standup(messages: list) -> str:
     if not messages:
         return "No recent messages found to summarize."
         
+    if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+        logger.warning("GEMINI_API_KEY not configured. Using local fallback standup summary.")
+        return (
+            "• **Recent Activity**: The team has been active in chat discussing task allocation and setup.\n"
+            "• **Status**: Database integration is currently in progress, and deliverables are being tracked.\n"
+            "• **Next Steps**: Review the tasks using the dashboard tasks board or /tasks in the bot."
+        )
+
     system_prompt = (
         "You are an AI Standup Secretary for a student group project.\n"
         "Given the last 50-100 chat messages of the team, filter out all casual social talk, greetings, memes, and arguments.\n"
@@ -105,6 +121,9 @@ def evaluate_vibe_severity_ai(messages: list) -> bool:
     if not messages:
         return False
         
+    if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+        return False
+
     system_prompt = (
         "You are a silent group chat moderator. Analyze the team transcript and decide if there is high toxic conflict, passive aggression, or team members calling out others for slacking/ghosting.\n"
         "Respond with exactly one word: 'YES' if intervention is needed, or 'NO' if it is healthy/casual chatter.\n"
@@ -123,11 +142,65 @@ def evaluate_vibe_severity_ai(messages: list) -> bool:
         logger.error(f"Error in evaluate_vibe_severity_ai: {e}")
         return False
 
+def local_parse_intent(text: str) -> dict:
+    t_lower = text.lower().strip()
+    
+    # Extract number for tasks
+    import re
+    def extract_id(s):
+        match = re.search(r'\b(?:task\s+)?(\d+)\b', s)
+        return int(match.group(1)) if match else None
+
+    # 1. show_tasks
+    if any(phrase in t_lower for phrase in ["show tasks", "what are the tasks", "show deliverables", "task list", "list tasks"]):
+        return {"intent": "show_tasks", "task_id": None}
+
+    # 2. claim_task
+    if any(phrase in t_lower for phrase in ["claim", "will do", "take task", "do task"]):
+        tid = extract_id(t_lower)
+        if tid is not None:
+            return {"intent": "claim_task", "task_id": tid}
+
+    # 3. complete_task
+    if any(phrase in t_lower for phrase in ["done", "complete", "finished", "completed"]):
+        tid = extract_id(t_lower)
+        if tid is not None:
+            return {"intent": "complete_task", "task_id": tid}
+
+    # 4. sos_task
+    if any(phrase in t_lower for phrase in ["backup", "sos", "overwhelmed", "help"]):
+        tid = extract_id(t_lower)
+        if tid is not None:
+            return {"intent": "sos_task", "task_id": tid}
+
+    # 5. nudge_task
+    if "nudge" in t_lower or "remind" in t_lower:
+        tid = extract_id(t_lower)
+        if tid is not None:
+            return {"intent": "nudge_task", "task_id": tid}
+
+    # 6. show_stats
+    if any(phrase in t_lower for phrase in ["stats", "leaderboard", "winning", "points"]):
+        return {"intent": "show_stats", "task_id": None}
+
+    # 7. show_standup
+    if any(phrase in t_lower for phrase in ["standup", "brief", "summar"]):
+        return {"intent": "show_standup", "task_id": None}
+
+    # 8. show_receipt
+    if "receipt" in t_lower:
+        return {"intent": "show_receipt", "task_id": None}
+        
+    return {"intent": "none", "task_id": None}
+
 def parse_natural_language_intent(text: str) -> dict:
     """
     Parses conversational user inputs into task management intents using Gemini 2.0 Flash.
     Returns a dict: {'intent': '...', 'task_id': int or None}
     """
+    if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+        return local_parse_intent(text)
+
     system_prompt = (
         "You are the natural language intent parsing engine for SyncUp AI, a student group project manager bot.\n"
         "Analyze the user message and map it to one of these intents:\n\n"
@@ -166,6 +239,40 @@ def audit_project_draft(draft_text: str, tasks: list) -> dict:
     """
     Audits a draft text against the parsed tasks/rubric deliverables using Gemini 2.0 Flash.
     """
+    if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+        logger.warning("GEMINI_API_KEY not configured. Using local fallback draft auditor.")
+        deliverables_audit = []
+        for t in tasks:
+            desc_lower = t.get("description", "").lower()
+            draft_lower = draft_text.lower()
+            
+            # Simple keyword match heuristic
+            keywords = [w for w in desc_lower.split() if len(w) > 4]
+            matches = sum(1 for kw in keywords if kw in draft_lower)
+            
+            status = "missing"
+            feedback = "No mention of this deliverable was found in the draft document."
+            
+            if len(keywords) > 0 and matches == len(keywords):
+                status = "complete"
+                feedback = "The draft document successfully implements and addresses this deliverable."
+            elif matches > 0:
+                status = "partial"
+                feedback = "This deliverable is partially mentioned but needs more detailed implementation context."
+                
+            deliverables_audit.append({
+                "task_id": t.get("id"),
+                "description": t.get("description"),
+                "status": status,
+                "feedback": feedback
+            })
+            
+        return {
+            "overall_status": "Ready for Review (Local Heuristic Audit)",
+            "overall_guidance": "Draft compliance audited using local keyword alignment matching. Please verify details before final submission.",
+            "deliverables_audit": deliverables_audit
+        }
+
     system_prompt = (
         "You are an academic project auditor. You will be provided with a draft document and a list of deliverables that the team is supposed to satisfy.\n"
         "Evaluate the draft against each deliverable and determine:\n"
@@ -239,6 +346,9 @@ def chat_with_mascot(message: str, history: list) -> str:
     )
     
     try:
+        if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+            raise ValueError("GEMINI_API_KEY not configured")
+        
         model = genai.GenerativeModel("gemini-2.0-flash")
         
         # Build prompt using chat history if available
@@ -253,6 +363,57 @@ def chat_with_mascot(message: str, history: list) -> str:
         return response.text.strip() if response.text else "Oh no! 🌸 Something went wrong, let's try again! ✨"
     except Exception as e:
         logger.error(f"Error in chat_with_mascot: {e}")
-        return "Oopsie! 🧸 I'm having trouble connecting to my AI brain right now. Can we try chatting again in a moment? 🎀✨"
+        msg_lower = message.lower()
+        if "command" in msg_lower or "help" in msg_lower or "bot" in msg_lower or "slash" in msg_lower:
+            return (
+                "<p>Oh! You want to know about my Telegram bot commands? 🎀✨ I've got you covered! 🐰🌸</p>"
+                "<p>Here are the key commands you can use in your group chat: 🌟</p>"
+                "<ul>"
+                "<li><b><code>/tasks</code></b> — Displays all active deliverables so you can claim/complete them 📋</li>"
+                "<li><b><code>/claim [id]</code></b> — Claim an open task (e.g. <code>/claim 3</code>) 🤝</li>"
+                "<li><b><code>/complete [id]</code></b> — Mark your task as done to get +10 XP! 🏆</li>"
+                "<li><b><code>/sos [id]</code></b> — Releases the task if you need backup! 🚨</li>"
+                "<li><b><code>/standup</code></b> — Get an AI standup summary of recent messages 📝</li>"
+                "</ul>"
+                "<p>Check out the new <b>Bot Commands</b> tab in the navbar for a full list! 🌼💛</p>"
+            )
+        elif "nudge" in msg_lower or "friction" in msg_lower or "remind" in msg_lower:
+            return (
+                "<p>Oh, nudges! 🤫 We want to keep everyone accountable, right? 🎀✨</p>"
+                "<p>To send an anonymous reminder to a teammate, start a private chat with me on Telegram (our bot) and type <b><code>/nudge [task_id]</code></b>. I'll post a polite reminder in the group chat, and no one will ever know it came from you! 🧸💖</p>"
+            )
+        elif "sos" in msg_lower or "backup" in msg_lower or "workload" in msg_lower or "stress" in msg_lower:
+            return (
+                "<p>Stress is definitely not preppy! 🧸💔 If a task is too heavy, don't worry!</p>"
+                "<p>Just type <b><code>I need backup on task [id]</code></b> or <b><code>/sos [id]</code></b> in the group chat. I'll release it back to the open pool so a teammate can claim or split it with you! 🤝🌸</p>"
+            )
+        elif "hello" in msg_lower or "hi" in msg_lower or "hey" in msg_lower or "hiii" in msg_lower:
+            return (
+                "<p>Hiiiii! 🎀🌸✨ Welcome to SyncUp AI! 🐰💛 I'm Syncie, your preppy AI companion!</p>"
+                "<p>I'm here to help you get those A's, keep your team in sync, and track XP points! 🏆💖</p>"
+                "<p>What project detail would you like to discuss today? 🌼🌟</p>"
+            )
+        elif "vibe" in msg_lower or "mood" in msg_lower or "feeling" in msg_lower:
+            return (
+                "<p>Oh, the Group Vibe Index! 💬✨ It checks how happy and aligned your team is! 🌸</p>"
+                "<p>My Vibe Check feature passively listens to group chat logs. If things get toxic or high-stress, I'll step in as a cute AI mediator with tips! 🤝🎀</p>"
+            )
+        elif "score" in msg_lower or "xp" in msg_lower or "points" in msg_lower or "reliability" in msg_lower:
+            return (
+                "<p>Ooh! Reliability Points and XP! 🏆✨ We love earning those! 🌸</p>"
+                "<p>When you complete a task, you get +10 XP. You can also rate and review your teammates (1-5 stars) from the dashboard! Let's build that contribution scoreboard! 🐰💖</p>"
+            )
+        elif "parser" in msg_lower or "rubric" in msg_lower or "audit" in msg_lower or "draft" in msg_lower:
+            return (
+                "<p>My AI tools are super cool! 🪄🔍</p>"
+                "<p>1. <b>AI Rubric Parser:</b> Paste your syllabus to auto-extract deliverables and claim them! 📋</p>"
+                "<p>2. <b>AI Pre-Submission Auditor:</b> Paste your project draft to see if you met all requirements before submitting! 🌟🐰</p>"
+            )
+        else:
+            return (
+                f"<p>Aww, I heard you say: <i>\"{message}\"</i> 🎀✨</p>"
+                "<p>I'm currently running on mascot fallback mode, but I can still guide you! 🐰🌸 You can ask me about <b>commands</b>, <b>nudging</b> slacking teammates, or how to handle <b>SOS/stress</b> backup! 💖</p>"
+                "<p>How can I help you sync up today? 🧸🌼</p>"
+            )
 
 

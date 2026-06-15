@@ -137,8 +137,16 @@
                     <p class="tagline" style="margin: 0;">Gradeline AI Group Workspace</p>
                 </div>
             </div>
-
             
+            <!-- YSP-Style Floating Pill Navigation -->
+            <nav class="header-nav">
+                <a href="#" class="nav-link active" data-view="overview">Overview</a>
+                <a href="#" class="nav-link" data-view="tasks">Tasks</a>
+                <a href="#" class="nav-link" data-view="ai-tools">AI Tools</a>
+                <a href="#" class="nav-link" data-view="reports">Reports</a>
+                <a href="#" class="nav-link" data-view="bot">Bot</a>
+            </nav>
+
             <div class="nav-controls">
                 <span id="user-profile-display" class="user-profile-display" style="font-weight: 500; font-size: 13.5px; color: var(--text-secondary); margin-right: 8px;"></span>
                 <div class="dropdown-wrapper">
@@ -161,213 +169,256 @@
                 <p>To view your live dashboard, add the Telegram bot to a group chat and send a message. Then, select your group from the dropdown menu above.</p>
             </div>
 
-            <div id="dashboard-grid" class="grid-container hidden">
-                <!-- Group Health Alert Banner -->
-                <div id="group-health-banner" class="card col-12 alert-banner hidden">
-                    <span class="icon">⚠️</span>
-                    <div class="banner-text">
-                        <strong>Ghosting Risk Alert:</strong> <span id="health-banner-text"></span>
-                    </div>
-                </div>
-
-                <!-- Hero Stats Row (Col 4, Col 4, Col 4) -->
-                <div class="card col-4 stat-card">
-                    <div class="card-header">
-                        <h3>Project Completion</h3>
-                        <span class="icon">📈</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="circular-progress">
-                            <svg class="progress-ring" width="120" height="120">
-                                <circle class="progress-ring__background" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <circle id="task-progress-ring" class="progress-ring__bar" stroke="#8b5cf6" stroke-width="8" stroke-dasharray="314.16" stroke-dashoffset="314.16" fill="transparent" r="50" cx="60" cy="60"/>
-                            </svg>
-                            <div id="task-progress-text" class="progress-value">0%</div>
-                        </div>
-                        <div class="stat-meta">
-                            <span id="stat-tasks-ratio">0 of 0 tasks completed</span>
+            <div id="dashboard-grid" class="hidden">
+                <!-- VIEW 1: OVERVIEW -->
+                <div id="view-overview" class="sub-view grid-container">
+                    <!-- Group Health Alert Banner -->
+                    <div id="group-health-banner" class="card col-12 alert-banner hidden">
+                        <span class="icon">⚠️</span>
+                        <div class="banner-text">
+                            <strong>Ghosting Risk Alert:</strong> <span id="health-banner-text"></span>
                         </div>
                     </div>
-                </div>
 
-                <div class="card col-4 vibe-card">
-                    <div class="card-header">
-                        <h3>Group Vibe Index</h3>
-                        <span class="icon">💬</span>
-                    </div>
-                    <div class="vibe-container">
-                        <div id="vibe-orb" class="vibe-orb idle"></div>
-                        <div class="vibe-info">
-                            <h4 id="vibe-status">Calm / Productive</h4>
-                            <p id="vibe-description">No stress triggers detected in recent chat communications. Keep executing!</p>
+                    <!-- Project Completion -->
+                    <div class="card col-4 stat-card">
+                        <div class="card-header">
+                            <h3>Project Completion</h3>
+                            <span class="icon">📈</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="circular-progress">
+                                <svg class="progress-ring" width="120" height="120">
+                                    <circle class="progress-ring__background" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                    <circle id="task-progress-ring" class="progress-ring__bar" stroke="#8b5cf6" stroke-width="8" stroke-dasharray="314.16" stroke-dashoffset="314.16" fill="transparent" r="50" cx="60" cy="60"/>
+                                </svg>
+                                <div id="task-progress-text" class="progress-value">0%</div>
+                            </div>
+                            <div class="stat-meta">
+                                <span id="stat-tasks-ratio">0 of 0 tasks completed</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card col-4 leaderboard-card">
-                    <div class="card-header">
-                        <h3>Reliability Scores</h3>
-                        <span class="icon">🏆</span>
-                    </div>
-                    <div class="leaderboard-container">
-                        <ul id="leaderboard-list" class="leaderboard-list">
-                            <!-- Loaded dynamically -->
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Main Content Area: Left (Deliverables & Nudge logs), Right (Rubric parsing & Standups) -->
-                <!-- Deliverables Panel -->
-                <div class="card col-8 tasks-card">
-                    <div class="card-header">
-                        <h3>Project Deliverables Board</h3>
-                        <div class="card-actions">
-                            <button id="btn-add-task-modal" class="btn-secondary btn-sm">+ Add Task</button>
+                    <!-- Group Vibe Index -->
+                    <div class="card col-4 vibe-card">
+                        <div class="card-header">
+                            <h3>Group Vibe Index</h3>
+                            <span class="icon">💬</span>
+                        </div>
+                        <div class="vibe-container">
+                            <div id="vibe-orb" class="vibe-orb idle"></div>
+                            <div class="vibe-info">
+                                <h4 id="vibe-status">Calm / Productive</h4>
+                                <p id="vibe-description">No stress triggers detected in recent chat communications. Keep executing!</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="table-wrapper">
-                        <table class="tasks-table">
-                            <thead>
-                                <tr>
-                                    <th width="10%">ID</th>
-                                    <th width="40%">Description</th>
-                                    <th width="20%">Assignee</th>
-                                    <th width="15%">Due Date</th>
-                                    <th width="15%">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tasks-table-body">
+
+                    <!-- Reliability Leaderboard -->
+                    <div class="card col-4 leaderboard-card">
+                        <div class="card-header">
+                            <h3>Reliability Scores</h3>
+                            <span class="icon">🏆</span>
+                        </div>
+                        <div class="leaderboard-container">
+                            <ul id="leaderboard-list" class="leaderboard-list">
                                 <!-- Loaded dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Standup Summary Panel -->
-                <div class="card col-4 standup-card">
-                    <div class="card-header">
-                        <h3>AI Standup Summary</h3>
-                        <button id="btn-refresh-standup" class="btn-link">Regenerate ⚡</button>
-                    </div>
-                    <div class="standup-body">
-                        <div id="standup-loader" class="loader hidden">Compiling team decisions...</div>
-                        <div id="standup-content" class="standup-list">
-                            <!-- Loaded dynamically -->
-                            <p class="muted">Click "Regenerate" to summarize the last group discussions.</p>
+                            </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- Rubric Parser & Draft Auditor Panel -->
-                <div class="card col-7 rubric-card">
-                    <div class="tab-header">
-                        <button class="tab-btn active" data-tab="rubric-parser">AI Rubric Task Parser</button>
-                        <button class="tab-btn" data-tab="draft-auditor">AI Pre-Submission Auditor</button>
+                <!-- VIEW 2: TASKS -->
+                <div id="view-tasks" class="sub-view grid-container hidden">
+                    <div class="card col-12 tasks-card">
+                        <div class="card-header">
+                            <h3>Project Deliverables Board</h3>
+                            <div class="card-actions">
+                                <button id="btn-add-task-modal" class="btn-secondary btn-sm">+ Add Task</button>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="tasks-table">
+                                <thead>
+                                    <tr>
+                                        <th width="10%">ID</th>
+                                        <th width="40%">Description</th>
+                                        <th width="20%">Assignee</th>
+                                        <th width="15%">Due Date</th>
+                                        <th width="15%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tasks-table-body">
+                                    <!-- Loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="tab-content" style="padding-top: 15px;">
-                        <!-- Rubric Parser Tab -->
-                        <div id="tab-rubric-parser" class="tab-pane active">
-                            <div class="rubric-body">
-                                <p class="section-desc">Paste raw assignment rubric or syllabus text below. The AI will extract deliverables for preview.</p>
-                                <textarea id="rubric-input" placeholder="Paste assignment brief, PDF contents, or grading rubric lines here... e.g.
+                </div>
+
+                <!-- VIEW 3: AI TOOLS -->
+                <div id="view-ai-tools" class="sub-view grid-container hidden">
+                    <!-- AI Rubric Task Parser -->
+                    <div class="card col-6 rubric-card">
+                        <div class="card-header">
+                            <h3>AI Rubric Task Parser</h3>
+                            <span class="icon">🪄</span>
+                        </div>
+                        <div class="rubric-body" style="margin-top: 10px;">
+                            <p class="section-desc">Paste raw assignment rubric or syllabus text below. The AI will extract deliverables for preview.</p>
+                            <textarea id="rubric-input" placeholder="Paste assignment brief, PDF contents, or grading rubric lines here... e.g.
 Assignment 1 deliverables:
 - Database schema structure (Due: Week 2)
 - Fast API routes implementation (Due: Week 3)
 - Frontend dashboard deployment (Due: Week 4)"></textarea>
-                                
-                                <div class="form-actions">
-                                    <button id="btn-analyze-rubric" class="btn-gradient">Extract Deliverables 🪄</button>
-                                </div>
+                            
+                            <div class="form-actions">
+                                <button id="btn-analyze-rubric" class="btn-gradient">Extract Deliverables 🪄</button>
+                            </div>
 
-                                <!-- Parsed Deliverables Preview -->
-                                <div id="rubric-preview-section" class="preview-section hidden">
-                                    <h4>🔍 Extracted Deliverables Preview</h4>
-                                    <ul id="parsed-tasks-list" class="parsed-tasks-list">
-                                        <!-- Rendered dynamically -->
-                                    </ul>
-                                    <div class="sync-actions">
-                                        <button id="btn-sync-tasks" class="btn-accent">Sync & Broadcast to Group Chat 🚀</button>
-                                    </div>
+                            <!-- Parsed Deliverables Preview -->
+                            <div id="rubric-preview-section" class="preview-section hidden">
+                                <h4>🔍 Extracted Deliverables Preview</h4>
+                                <ul id="parsed-tasks-list" class="parsed-tasks-list">
+                                    <!-- Rendered dynamically -->
+                                </ul>
+                                <div class="sync-actions">
+                                    <button id="btn-sync-tasks" class="btn-accent">Sync & Broadcast to Group Chat 🚀</button>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Draft Auditor Tab -->
-                        <div id="tab-draft-auditor" class="tab-pane">
-                            <div class="rubric-body">
-                                <p class="section-desc">Paste your group project draft or report below. Gemini AI will audit it against all deliverables in your deliverables board.</p>
-                                <textarea id="draft-input" placeholder="Paste your draft report, codebase description, or essay text here for immediate rubric compliance grading..."></textarea>
-                                
-                                <div class="form-actions">
-                                    <button id="btn-audit-draft" class="btn-gradient">Audit Draft Document 🔍</button>
-                                </div>
+                    <!-- AI Pre-Submission Auditor -->
+                    <div class="card col-6 auditor-card">
+                        <div class="card-header">
+                            <h3>AI Pre-Submission Auditor</h3>
+                            <span class="icon">🔍</span>
+                        </div>
+                        <div class="rubric-body" style="margin-top: 10px;">
+                            <p class="section-desc">Paste your group project draft or report below. Gemini AI will audit it against all deliverables in your deliverables board.</p>
+                            <textarea id="draft-input" placeholder="Paste your draft report, codebase description, or essay text here for immediate rubric compliance grading..."></textarea>
+                            
+                            <div class="form-actions">
+                                <button id="btn-audit-draft" class="btn-gradient">Audit Draft Document 🔍</button>
+                            </div>
 
-                                <!-- Auditor Results Preview -->
-                                <div id="audit-results-section" class="preview-section hidden" style="margin-top: 20px;">
-                                    <h4>📋 AI Rubric Compliance Audit Report</h4>
-                                    <div class="audit-summary-box" style="margin-bottom: 15px; padding: 15px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--accent);">
-                                        <div style="font-weight: 700; margin-bottom: 5px;">Status: <span id="audit-summary-status" style="color: var(--accent-light);">Loading...</span></div>
-                                        <p id="audit-summary-guidance" style="font-size: 13.5px; margin: 0; line-height: 1.5; color: var(--text-secondary);"></p>
-                                    </div>
-                                    <ul id="audit-deliverables-list" class="parsed-tasks-list">
-                                        <!-- Rendered dynamically -->
-                                    </ul>
+                            <!-- Auditor Results Preview -->
+                            <div id="audit-results-section" class="preview-section hidden" style="margin-top: 20px;">
+                                <h4>📋 AI Rubric Compliance Audit Report</h4>
+                                <div class="audit-summary-box" style="margin-bottom: 15px; padding: 15px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--accent-pink);">
+                                    <div style="font-weight: 700; margin-bottom: 5px;">Status: <span id="audit-summary-status" style="color: var(--accent-pink);">Loading...</span></div>
+                                    <p id="audit-summary-guidance" style="font-size: 13.5px; margin: 0; line-height: 1.5; color: var(--text-secondary);"></p>
                                 </div>
+                                <ul id="audit-deliverables-list" class="parsed-tasks-list">
+                                    <!-- Rendered dynamically -->
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Logs, Nudges & Export Receipt -->
-                <div class="card col-5 telemetry-card">
-                    <div class="tab-header">
-                        <button class="tab-btn active" data-tab="nudges">Friction / Nudges Log</button>
-                        <button class="tab-btn" data-tab="peer-reviews">Peer Reviews</button>
-                        <button class="tab-btn" data-tab="receipt">Receipt Export</button>
-                        <button class="tab-btn" data-tab="bot-commands">Bot Commands</button>
+                <!-- VIEW 4: REPORTS -->
+                <div id="view-reports" class="sub-view grid-container hidden">
+                    <!-- AI Standup Summary -->
+                    <div class="card col-6 standup-card">
+                        <div class="card-header">
+                            <h3>AI Standup Summary</h3>
+                            <button id="btn-refresh-standup" class="btn-link">Regenerate ⚡</button>
+                        </div>
+                        <div class="standup-body">
+                            <div id="standup-loader" class="loader hidden">Compiling team decisions...</div>
+                            <div id="standup-content" class="standup-list">
+                                <!-- Loaded dynamically -->
+                                <p class="muted">Click "Regenerate" to summarize the last group discussions.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="tab-content">
-                        <!-- Nudges Log Tab -->
-                        <div id="tab-nudges" class="tab-pane active">
-                            <div class="nudges-timeline-wrapper">
-                                <ul id="nudges-timeline" class="nudges-timeline">
-                                    <!-- Loaded dynamically -->
-                                </ul>
+
+                    <!-- Friction / Nudges Log -->
+                    <div class="card col-6 telemetry-card">
+                        <div class="card-header">
+                            <h3>Friction / Nudges Log</h3>
+                            <span class="icon">🔔</span>
+                        </div>
+                        <div class="nudges-timeline-wrapper" style="margin-top: 10px;">
+                            <ul id="nudges-timeline" class="nudges-timeline">
+                                <!-- Loaded dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Peer Reviews Log -->
+                    <div class="card col-6 reviews-card">
+                        <div class="card-header">
+                            <h3>Peer Reviews Log</h3>
+                            <span class="icon">⭐</span>
+                        </div>
+                        <div class="peer-reviews-timeline-wrapper" style="margin-top: 10px;">
+                            <ul id="peer-reviews-list" class="peer-reviews-list">
+                                <!-- Loaded dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Receipt Export -->
+                    <div class="card col-6 receipt-card">
+                        <div class="card-header">
+                            <h3>Receipt Export</h3>
+                            <span class="icon">🧾</span>
+                        </div>
+                        <p class="section-desc">Generate a secure contribution receipt for your course professor.</p>
+                        <div class="receipt-preview-box">
+                            <pre id="receipt-content">Loading receipt details...</pre>
+                        </div>
+                        <button id="btn-copy-receipt" class="btn-secondary btn-full">Copy Markdown Receipt 📋</button>
+                    </div>
+                </div>
+
+                <!-- VIEW 5: BOT COMMANDS -->
+                <div id="view-bot" class="sub-view grid-container hidden">
+                    <div class="card col-12 bot-commands-card">
+                        <div class="card-header">
+                            <h3>Telegram Bot Commands Cheat Sheet</h3>
+                            <span class="icon">🤖</span>
+                        </div>
+                        <div class="commands-filter-row" style="margin-top: 10px;">
+                            <input type="text" id="command-search" placeholder="Search commands... 🎀" class="command-search-input">
+                            <div class="command-filters">
+                                <button class="filter-pill active" data-filter="all">All</button>
+                                <button class="filter-pill" data-filter="slash">Slash</button>
+                                <button class="filter-pill" data-filter="nlp">Natural Talk</button>
                             </div>
                         </div>
                         
-                        <!-- Peer Reviews Tab -->
-                        <div id="tab-peer-reviews" class="tab-pane">
-                            <div class="peer-reviews-timeline-wrapper">
-                                <ul id="peer-reviews-list" class="peer-reviews-list">
-                                    <!-- Loaded dynamically -->
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- Receipt Export Tab -->
-                        <div id="tab-receipt" class="tab-pane">
-                            <p class="section-desc">Generate a secure contribution receipt for your course professor.</p>
-                            <div class="receipt-preview-box">
-                                <pre id="receipt-content">Loading receipt details...</pre>
-                            </div>
-                            <button id="btn-copy-receipt" class="btn-secondary btn-full">Copy Markdown Receipt 📋</button>
-                        </div>
-
-                        <!-- Bot Commands Tab -->
-                        <div id="tab-bot-commands" class="tab-pane">
-                            <div class="commands-filter-row">
-                                <input type="text" id="command-search" placeholder="Search commands... 🎀" class="command-search-input">
-                                <div class="command-filters">
-                                    <button class="filter-pill active" data-filter="all">All</button>
-                                    <button class="filter-pill" data-filter="slash">Slash</button>
-                                    <button class="filter-pill" data-filter="nlp">Natural</button>
-                                </div>
-                            </div>
+                        <div class="bot-commands-grid-layout" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 20px;">
+                            <!-- Dynamic Command List Column -->
                             <div class="commands-list-wrapper">
                                 <div class="commands-list" id="commands-list-container">
                                     <!-- Rendered dynamically by JS -->
                                 </div>
+                            </div>
+                            
+                            <!-- Static Bot Instructions Column -->
+                            <div class="bot-instructions-panel" style="padding: 20px; border-radius: 18px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid rgba(255, 182, 193, 0.25);">
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                    <span>💡</span> Quick Start Guide
+                                </h4>
+                                <ol style="padding-left: 18px; font-size: 12.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px;">
+                                    <li>Add the bot to your group chat (make sure it has message read access).</li>
+                                    <li>Use <b>Natural Talk</b> to interact conversationally, or type standard <b>Slash commands</b>.</li>
+                                    <li>To send an anonymous nudge, you <b>must</b> message the bot in your private direct message chat to keep your request confidential.</li>
+                                    <li>Earn XP for completing deliverables and climb the leaderboard!</li>
+                                </ol>
+                                
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; margin-top: 24px; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                    <span>⚙️</span> Commands Legend
+                                </h4>
+                                <ul style="list-style: none; font-size: 12.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; padding: 0;">
+                                    <li style="display: flex; align-items: center; gap: 8px;"><span class="badge-status open" style="padding: 2px 8px; font-size: 9px;">Slash</span> Standard Telegram commands starting with <code>/</code>.</li>
+                                    <li style="display: flex; align-items: center; gap: 8px;"><span class="badge-status claimed" style="padding: 2px 8px; font-size: 9px;">Natural</span> Plain text conversational phrases.</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
