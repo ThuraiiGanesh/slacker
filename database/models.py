@@ -133,6 +133,81 @@ def init_db():
     );
     """)
     
+    # --- Auto-Seeding Demo Data ---
+    # Seed default/demo users if they do not exist
+    demo_users = [
+        (2001, 'peer1', 'Charlie', None, 0),
+        (2002, 'peer2', 'Delta', None, 5),
+        (11111, 'test_hacker', 'Hacker', 'Evil', 20),
+        (99999, 'test_ganesh', 'Ganesh', 'Test', 0),
+        (6816114271, 'Doggodestroyer', 'Dogggo', 'Destroyer', 0)
+    ]
+    for uid, uname, fname, lname, pts in demo_users:
+        cursor.execute(
+            "INSERT OR IGNORE INTO users (id, username, first_name, last_name, reliability_points) VALUES (?, ?, ?, ?, ?)",
+            (uid, uname, fname, lname, pts)
+        )
+        cursor.execute(
+            "UPDATE users SET username = ?, first_name = ?, last_name = ? WHERE id = ?",
+            (uname, fname, lname, uid)
+        )
+
+    # Seed default/demo groups if they do not exist
+    demo_groups = [
+        (201, 'Test Peer Review Group'),
+        (-100999, 'Secret Group Project'),
+        (-5426437660, 'blahetst'),
+        (-5293581723, 'googoo')
+    ]
+    for gid, gname in demo_groups:
+        cursor.execute(
+            "INSERT OR IGNORE INTO groups (id, name) VALUES (?, ?)",
+            (gid, gname)
+        )
+
+    # Seed group members
+    demo_memberships = [
+        (201, 2001),
+        (201, 2002),
+        (-100999, 99999),
+        (-100999, 11111),
+        (-100999, 6816114271),
+        (-5426437660, 6816114271),
+        (-5293581723, 6816114271)
+    ]
+    for gid, uid in demo_memberships:
+        cursor.execute(
+            "INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)",
+            (gid, uid)
+        )
+
+    # Seed a couple of default tasks for testing bento layout and deliverables board
+    demo_tasks = [
+        (1, -100999, 6816114271, 'Database schema structure and SQLite layers (Demo)', 'completed', 'Week 2', None),
+        (2, -100999, 99999, 'FastAPI authentication & OTP verification endpoints (Demo)', 'completed', 'Week 3', None),
+        (3, -100999, 6816114271, 'Develop interactive web dashboard and YSP capsule navigation (Demo)', 'claimed', 'Week 4', None),
+        (4, -100999, None, 'Integration testing and deployment on Railway (Demo)', 'open', 'Week 4', 3),
+        (5, 201, 2001, 'Implement draft peer reviews and logging triggers (Demo)', 'completed', 'Week 2', None)
+    ]
+    for tid, gid, uid, desc, status, due, blocked_by in demo_tasks:
+        cursor.execute(
+            "INSERT OR IGNORE INTO tasks (id, group_id, assigned_to, description, status, due_date, blocked_by) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (tid, gid, uid, desc, status, due, blocked_by)
+        )
+
+    # Seed sample peer reviews
+    demo_reviews = [
+        (2, 201, 2001, 2002, 5, 'Excellent work on API integration!'),
+        (3, -100999, 99999, 11111, 5, 'Outstanding work coordinating the backend tasks!'),
+        (4, -100999, 99999, 6816114271, 5, 'Super helpful with the Telegram bot connection and persistent database paths!'),
+        (5, -100999, 6816114271, 99999, 5, 'Amazing job styling the floating capsule headers and view transitions!')
+    ]
+    for rid, gid, rev_id, reviewee_id, rating, feedback in demo_reviews:
+        cursor.execute(
+            "INSERT OR IGNORE INTO peer_reviews (id, group_id, reviewer_id, reviewee_id, rating, feedback) VALUES (?, ?, ?, ?, ?, ?)",
+            (rid, gid, rev_id, reviewee_id, rating, feedback)
+        )
+    
     conn.commit()
     conn.close()
 
