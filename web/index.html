@@ -13,6 +13,16 @@
 <body>
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
+
+    <!-- SVG Defs for gradients (hidden) -->
+    <svg width="0" height="0" style="position:absolute;">
+        <defs>
+            <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ec4899"/>
+                <stop offset="100%" stop-color="#be185d"/>
+            </linearGradient>
+        </defs>
+    </svg>
     
     <!-- Login Landing Page -->
     <div id="login-page" class="login-wrapper">
@@ -112,21 +122,21 @@
                             <ellipse cx="58" cy="24" rx="3.5" ry="11" fill="#ffe5ec" />
                         </g>
                         <!-- Body Base -->
-                        <circle cx="45" cy="55" r="23" class="mascot-body-base" />
+                        <circle cx="45" cy="55" r="23" fill="#ffffff" stroke="#ffd6e7" stroke-width="1.5" />
                         <!-- Head Blush -->
-                        <ellipse cx="28" cy="59" rx="5" ry="2.5" class="mascot-blush" />
-                        <ellipse cx="62" cy="59" rx="5" ry="2.5" class="mascot-blush" />
+                        <ellipse cx="28" cy="59" rx="5" ry="2.5" fill="#ffb3c6" opacity="0.75" />
+                        <ellipse cx="62" cy="59" rx="5" ry="2.5" fill="#ffb3c6" opacity="0.75" />
                         <!-- Eyes -->
-                        <circle cx="35" cy="53" r="3.5" fill="#3d3a45" class="mascot-eye" />
-                        <circle cx="55" cy="53" r="3.5" fill="#3d3a45" class="mascot-eye" />
+                        <circle cx="35" cy="53" r="3" fill="#2d2438" />
+                        <circle cx="55" cy="53" r="3" fill="#2d2438" />
+                        <circle cx="36" cy="51.8" r="0.8" fill="#ffffff" />
+                        <circle cx="56" cy="51.8" r="0.8" fill="#ffffff" />
                         <!-- Mouth -->
                         <path d="M43 57.5 Q45 59 47 57.5" stroke="#ff85a1" stroke-width="2" fill="none" stroke-linecap="round" />
                         <!-- Ribbon Bow -->
-                        <g class="mascot-bow-ribbon">
-                            <circle cx="45" cy="67" r="4" />
-                            <path d="M45 67 C38 60 35 72 45 67 Z" />
-                            <path d="M45 67 C52 60 55 72 45 67 Z" />
-                        </g>
+                        <circle cx="45" cy="67" r="4" fill="#ec4899" />
+                        <path d="M45 67 C38 60 35 72 45 67 Z" fill="#ec4899" />
+                        <path d="M45 67 C52 60 55 72 45 67 Z" fill="#ec4899" />
                     </svg>
                 </div>
                 <div style="display: flex; flex-direction: column;">
@@ -501,38 +511,45 @@ Assignment 1 deliverables:
     </div>
 
     <!-- Mascot Chatbot Floating Widget -->
+    <svg width="0" height="0" style="position: absolute;">
+        <defs>
+            <linearGradient id="pink-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#be185d;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
     <div class="chatbot-widget-container">
         <div id="chatbot-launcher" class="chatbot-launcher" title="Ask Syncie! 🎀">
-            <div id="chatbot-badge" class="notification-badge">1</div>
+            🐰
+            <div id="chatbot-badge" style="position:absolute;top:-4px;right:-4px;background:#fbbf24;color:#1a0010;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;">1</div>
         </div>
         <div id="chatbot-panel" class="chatbot-panel">
-            <div class="chatbot-header">
-                <div class="chatbot-header-info">
-                    <div class="chatbot-header-avatar">🐰</div>
-                    <div>
-                        <h4 style="margin: 0; font-size: 14px; font-weight: 700;">Syncie 🎀</h4>
-                        <span style="font-size: 10px; opacity: 0.9;">Preppy AI Helper</span>
-                    </div>
+            <div class="chatbot-panel-header" style="display:flex;align-items:center;gap:12px;padding:15px;border-bottom:1px solid rgba(255,255,255,0.1);">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#be185d);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 3px 10px rgba(236,72,153,0.45);">🐰</div>
+                <div>
+                    <div class="chatbot-avatar-name" style="font-weight:700;font-size:14px;">Syncie 🎀</div>
+                    <div class="chatbot-subtitle" style="font-size:10px;opacity:0.8;">Your Preppy AI Helper</div>
                 </div>
-                <span id="chatbot-close" class="chatbot-close">&times;</span>
+                <span id="chatbot-close" style="margin-left:auto;font-size:20px;cursor:pointer;color:var(--text-muted);transition:color 0.2s;" onmouseover="this.style.color='var(--accent-pink)'" onmouseout="this.style.color='var(--text-muted)'">&times;</span>
             </div>
             <div id="chatbot-messages" class="chatbot-messages">
                 <div class="chat-msg mascot">
-                    <p>🎀 <b>Hi there, friend!</b> 🌸</p>
+                    <p>🎀 <b>Hi there, bestie!</b> 🌸</p>
                     <p>I'm <b>Syncie</b>, your preppy accountability helper! 🐰✨ Ask me anything about:</p>
-                    <ul>
-                        <li>📝 Telegram commands & how to claim/complete tasks</li>
-                        <li>🤫 Sending anonymous reminders (nudges)</li>
-                        <li>🚨 Managing workload stress with SOS</li>
-                        <li>💬 How Vibe Check sentiment moderation works</li>
-                        <li>🏆 Gaining XP and exporting grade receipts</li>
+                    <ul style="padding-left:16px;margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+                        <li>📝 Telegram commands &amp; claiming tasks</li>
+                        <li>🤫 Sending anonymous nudges</li>
+                        <li>🚨 Managing stress with SOS</li>
+                        <li>💬 Vibe Check sentiment moderation</li>
+                        <li>🏆 XP &amp; grade receipts</li>
                     </ul>
-                    <p>What can I help you sync up today? 🌼💛</p>
+                    <p style="margin-top:8px;">What can I help you sync up today? 🌼💖</p>
                 </div>
             </div>
             <div class="chatbot-input-container">
                 <input type="text" id="chatbot-input" placeholder="Type a message to Syncie... 🎀">
-                <button id="chatbot-send" class="chatbot-send">💖</button>
+                <button id="chatbot-send" class="btn-gradient" style="width:36px;height:36px;padding:0;border-radius:50%;font-size:16px;">💖</button>
             </div>
         </div>
     </div>
