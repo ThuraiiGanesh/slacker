@@ -722,7 +722,7 @@ function renderTasks(tasks) {
 }
 
 // Complete task via dashboard
-async function completeTask(taskId) {
+window.completeTask = async function(taskId) {
     try {
         const res = await authorizedFetch(`${API_BASE}/tasks/${taskId}/complete`, {
             method: 'POST'
