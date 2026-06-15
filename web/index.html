@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2.0.2">
 </head>
 <body>
     <div class="ambient-glow glow-1"></div>
@@ -83,7 +83,7 @@
             
             <!-- Step 2: OTP Verification -->
             <form id="login-step2-form" class="login-form hidden">
-                <p class="form-instructions">A verification code has been sent to your Telegram account. Enter it below to complete sign in.</p>
+                <p class="form-instructions" id="otp-instructions">A verification code has been sent to your Telegram account. Enter it below to complete sign in.</p>
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label for="login-otp">6-Digit Verification Code</label>
                     <input type="text" id="login-otp" placeholder="123456" maxlength="6" pattern="\d{6}" required style="text-align: center; font-size: 22px; letter-spacing: 8px; font-weight: bold; padding: 14px;">
@@ -531,7 +531,7 @@ Assignment 1 deliverables:
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=2.0.2"></script>
 </body>
 </html>
 

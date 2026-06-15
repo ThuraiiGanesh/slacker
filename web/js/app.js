@@ -363,6 +363,16 @@ function setupEventListeners() {
                 loginStep1Form.classList.add('hidden');
                 loginStep2Form.classList.remove('hidden');
                 loginError2.classList.add('hidden');
+                
+                const otpInstructions = document.getElementById('otp-instructions');
+                if (otpInstructions) {
+                    if (data.simulation_otp) {
+                        otpInstructions.innerHTML = `⚠️ Running in <b>Simulation Mode</b> (no Telegram Bot token).<br>Use code <b>${data.simulation_otp}</b> (or master code <b>123456</b>) to login!`;
+                        loginOtp.value = data.simulation_otp;
+                    } else {
+                        otpInstructions.textContent = "A verification code has been sent to your Telegram account. Enter it below to complete sign in.";
+                    }
+                }
             } else {
                 loginError1.textContent = data.detail || "Failed to send verification code.";
                 loginError1.classList.remove('hidden');

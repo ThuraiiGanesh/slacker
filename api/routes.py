@@ -115,6 +115,11 @@ async def send_otp(request: SendOtpRequest):
     else:
         # Simulation mode fallback for testing
         print(f"[SIMULATION] OTP code for @{username} (ID: {user['id']}) is {otp_code}")
+        return {
+            "status": "success",
+            "message": "OTP code sent successfully (Simulation Mode)!",
+            "simulation_otp": otp_code
+        }
         
     return {"status": "success", "message": "OTP code sent successfully via Telegram!"}
 
@@ -124,7 +129,12 @@ def verify_otp_endpoint(request: VerifyOtpRequest):
     if username.startswith("@"):
         username = username[1:]
         
-    user = models.verify_otp(username, request.otp_code.strip())
+    # If in simulation mode, allow master bypass '123456'
+    if telegram_app is None and request.otp_code.strip() == "123456":
+        user = models.get_user_by_username(username)
+    else:
+        user = models.verify_otp(username, request.otp_code.strip())
+        
     if not user:
         raise HTTPException(status_code=401, detail="Invalid or expired OTP code.")
         
