@@ -148,7 +148,10 @@ const BOT_COMMANDS = [
 // DOM Elements
 const appWrapper = document.getElementById('app-wrapper');
 const loginPage = document.getElementById('login-page');
-const groupSelector = document.getElementById('group-selector');
+const groupDropdown = document.getElementById('group-dropdown');
+const groupDropdownTrigger = document.getElementById('group-dropdown-trigger');
+const groupDropdownSelected = document.getElementById('group-dropdown-selected');
+const groupDropdownMenu = document.getElementById('group-dropdown-menu');
 const btnRefresh = document.getElementById('btn-refresh');
 const noGroupAlert = document.getElementById('no-group-alert');
 const dashboardGrid = document.getElementById('dashboard-grid');
@@ -463,11 +466,21 @@ function setupEventListeners() {
         handleUnauthorized();
     });
 
-    // Dropdown Group selector
-    groupSelector.addEventListener('change', (e) => {
-        currentGroupId = parseInt(e.target.value);
-        loadGroupData(currentGroupId);
-    });
+    // Custom Dropdown Group selector toggle
+    if (groupDropdownTrigger && groupDropdownMenu) {
+        groupDropdownTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            groupDropdown.classList.toggle('active');
+            groupDropdownMenu.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (groupDropdown && !groupDropdown.contains(e.target)) {
+                groupDropdown.classList.remove('active');
+                groupDropdownMenu.classList.add('hidden');
+            }
+        });
+    }
 
     // Global refresh
     btnRefresh.addEventListener('click', () => {
@@ -605,34 +618,127 @@ function setupEventListeners() {
     });
 }
 
+// Helpers for visual premium group selector UI
+function getInitials(name) {
+    if (!name) return 'GP';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+}
+
+function getGroupGradient(id) {
+    const gradients = [
+        'linear-gradient(135deg, #f472b6 0%, #c084fc 100%)', // Pink to Violet
+        'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)', // Cyan to Indigo
+        'linear-gradient(135deg, #34d399 0%, #0284c7 100%)', // Mint to Sky Blue
+        'linear-gradient(135deg, #fb7185 0%, #f43f5e 100%)', // Rose to Red
+        'linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)'  // Lavender to Pink
+    ];
+    return gradients[id % gradients.length];
+}
+
+function getGroupEmoji(name) {
+    const n = name.toLowerCase();
+    if (n.includes('secret') || n.includes('project')) return '🛡️';
+    if (n.includes('blah')) return '🧪';
+    if (n.includes('goo')) return '🍭';
+    if (n.includes('bot')) return '🤖';
+    if (n.includes('ai') || n.includes('sync')) return '✨';
+    return '👥';
+}
+
+// Render Custom Group Dropdown menu items
+function renderGroupDropdown(groups) {
+    const selectedText = document.getElementById('group-dropdown-selected');
+    const menu = document.getElementById('group-dropdown-menu');
+    const activeAvatar = document.getElementById('group-dropdown-active-avatar');
+    
+    if (!menu || !selectedText) return;
+    menu.innerHTML = '';
+    
+    if (groups.length === 0) {
+        selectedText.textContent = 'No groups found';
+        if (activeAvatar) activeAvatar.textContent = '👥';
+        return;
+    }
+    
+    // Find active group
+    const activeGroup = groups.find(g => g.id === currentGroupId) || groups[0];
+    currentGroupId = activeGroup.id;
+    selectedText.textContent = activeGroup.name;
+    if (activeAvatar) {
+        activeAvatar.textContent = getGroupEmoji(activeGroup.name);
+        const parent = activeAvatar.parentElement;
+        if (parent) {
+            parent.style.background = getGroupGradient(activeGroup.id);
+        }
+    }
+    
+    groups.forEach(group => {
+        const item = document.createElement('div');
+        item.className = 'custom-dropdown-item';
+        const isSelected = currentGroupId === group.id;
+        if (isSelected) {
+            item.classList.add('selected');
+        }
+        
+        const initials = getInitials(group.name);
+        const gradient = getGroupGradient(group.id);
+        const emoji = getGroupEmoji(group.name);
+        
+        item.innerHTML = `
+            <div class="dropdown-item-avatar" style="background: ${gradient};">
+                ${emoji}
+            </div>
+            <div class="dropdown-item-info">
+                <span class="dropdown-item-title">${group.name}</span>
+                <span class="dropdown-item-subtitle">${isSelected ? 'Active Workspace' : 'Switch to workspace'}</span>
+            </div>
+            ${isSelected ? '<span class="dropdown-item-check">✓</span>' : ''}
+        `;
+        
+        item.addEventListener('click', () => {
+            currentGroupId = group.id;
+            selectedText.textContent = group.name;
+            if (activeAvatar) {
+                activeAvatar.textContent = emoji;
+                const parent = activeAvatar.parentElement;
+                if (parent) {
+                    parent.style.background = gradient;
+                }
+            }
+            
+            // Highlight selected item
+            menu.querySelectorAll('.custom-dropdown-item').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+            
+            menu.classList.add('hidden');
+            document.getElementById('group-dropdown').classList.remove('active');
+            
+            loadGroupData(currentGroupId);
+        });
+        menu.appendChild(item);
+    });
+}
+
 // Fetch registered groups
 async function fetchGroups() {
     try {
         const res = await authorizedFetch(`${API_BASE}/groups`);
         const groups = await res.json();
         
-        // Clear selector
-        groupSelector.innerHTML = '<option value="" disabled selected>Select a group chat...</option>';
-        
         if (groups.length === 0) {
             noGroupAlert.classList.remove('hidden');
             dashboardGrid.classList.add('hidden');
+            renderGroupDropdown([]);
             return;
         }
 
-        groups.forEach(group => {
-            const opt = document.createElement('option');
-            opt.value = group.id;
-            opt.textContent = group.name;
-            groupSelector.appendChild(opt);
-        });
-
-        // Auto-select first group for presentation convenience
-        if (groups.length > 0) {
-            groupSelector.selectedIndex = 1;
+        // Auto-select first group for convenience
+        if (!currentGroupId && groups.length > 0) {
             currentGroupId = groups[0].id;
-            loadGroupData(currentGroupId);
         }
+        
+        renderGroupDropdown(groups);
+        loadGroupData(currentGroupId);
     } catch (err) {
         console.error("Error fetching groups:", err);
     }
@@ -1082,7 +1188,7 @@ function generateReceiptText(tasks) {
         }
     });
 
-    const groupName = groupSelector.options[groupSelector.selectedIndex].text;
+    const groupName = document.getElementById('group-dropdown-selected')?.textContent || 'Active Group';
     const dateStr = new Date().toLocaleDateString([], {year: 'numeric', month: 'long', day: 'numeric'});
 
     let receiptLines = [

@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style_v3.css">
 </head>
 <body>
     <div class="ambient-glow glow-1"></div>
@@ -149,11 +149,20 @@
 
             <div class="nav-controls">
                 <span id="user-profile-display" class="user-profile-display" style="font-weight: 500; font-size: 13.5px; color: var(--text-secondary); margin-right: 8px;"></span>
-                <div class="dropdown-wrapper">
-                    <label for="group-selector">Active Group:</label>
-                    <select id="group-selector">
-                        <option value="" disabled selected>Select a group chat...</option>
-                    </select>
+                <div class="custom-dropdown" id="group-dropdown">
+                    <div class="custom-dropdown-trigger" id="group-dropdown-trigger">
+                        <div class="dropdown-active-avatar-container">
+                            <span class="dropdown-group-avatar" id="group-dropdown-active-avatar">👥</span>
+                        </div>
+                        <div class="dropdown-trigger-text">
+                            <span class="dropdown-label">Active Group</span>
+                            <span class="dropdown-selected-value" id="group-dropdown-selected">Select a group...</span>
+                        </div>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="custom-dropdown-menu hidden" id="group-dropdown-menu">
+                        <!-- Options loaded dynamically -->
+                    </div>
                 </div>
                 <button id="btn-refresh" class="btn-icon" title="Refresh Dashboard">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -531,7 +540,7 @@ Assignment 1 deliverables:
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script src="js/app_v3.js"></script>
 </body>
 </html>
 
