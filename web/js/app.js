@@ -1,5 +1,7 @@
 // API Server Config
-const API_BASE = '/api';
+const API_BASE = window.location.protocol === 'file:' 
+    ? 'http://localhost:8000/api' 
+    : '/api';
 
 // State Management
 let currentGroupId = null;

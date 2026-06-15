@@ -25,8 +25,19 @@ TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TELEGRAM_BOT_TOKEN:
     logger.warning("[WARNING] TELEGRAM_BOT_TOKEN environment variable not set. Telegram Bot will run in SIMULATION/OFFLINE mode.")
 
+from fastapi.middleware.cors import CORSMiddleware
+
 # Create FastAPI app
 app = FastAPI(title="SyncUp AI API", description="Gradeline AI Hackathon MVP Backend")
+
+# Enable CORS for file:// protocol (Origin: null) and local/deployment ports
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=".*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize SQLite database
 models.init_db()
