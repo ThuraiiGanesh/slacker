@@ -417,3 +417,106 @@ def chat_with_mascot(message: str, history: list) -> str:
             )
 
 
+def generate_meeting_minutes(transcript_text: str) -> dict:
+    """
+    Generates structured meeting minutes from a raw transcript using Gemini 2.0 Flash.
+    Returns dict with decisions, action_items, and summary.
+    """
+    if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+        return {
+            "summary": "Meeting minutes generation unavailable (API key not configured).",
+            "decisions": ["Configure the Gemini API key to enable this feature."],
+            "action_items": []
+        }
+
+    system_prompt = (
+        "You are a professional meeting secretary for a student project team.\n"
+        "Analyze the following meeting transcript or notes and extract:\n"
+        "1. A 2-sentence summary of what was discussed.\n"
+        "2. Key decisions made (list).\n"
+        "3. Action items — each with: owner (person responsible), task, and deadline if mentioned.\n\n"
+        "Return ONLY valid JSON with keys:\n"
+        "- \"summary\": string\n"
+        "- \"decisions\": list of strings\n"
+        "- \"action_items\": list of objects {\"owner\": str, \"task\": str, \"deadline\": str or null}\n"
+        "Do not wrap in markdown. Return raw JSON only."
+    )
+    try:
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        generation_config = {"response_mime_type": "application/json", "temperature": 0.2}
+        prompt = f"System Instruction:\n{system_prompt}\n\nMeeting Transcript:\n{transcript_text}"
+        response = model.generate_content(prompt, generation_config=generation_config)
+        if response.text:
+            return json.loads(response.text.strip())
+    except Exception as e:
+        logger.error(f"Error in generate_meeting_minutes: {e}")
+    return {"summary": "Could not generate meeting minutes.", "decisions": [], "action_items": []}
+
+
+def predict_grade_risk(tasks: list, days_until_deadline: int = 14) -> dict:
+    """
+    Uses Gemini to predict grade risk (0-100) based on task completion and time remaining.
+    """
+    total = len(tasks)
+    completed = len([t for t in tasks if t.get("status") == "completed"])
+    open_tasks = len([t for t in tasks if t.get("status") == "open"])
+
+    if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
+        pct = int((completed / total * 100) if total > 0 else 0)
+        score = max(0, 100 - pct)
+        return {
+            "risk_score": score,
+            "risk_level": "High" if score > 66 else "Medium" if score > 33 else "Low",
+            "explanation": f"{completed}/{total} tasks completed with {days_until_deadline} days remaining.",
+            "recommendations": ["Keep completing tasks to reduce risk.", "Assign all unclaimed tasks.", "Review upcoming deadlines."]
+        }
+
+    system_prompt = (
+        "You are an academic project risk analyst.\n"
+        "Given the following project stats, predict the grade risk for the student group.\n"
+        "Risk score is 0 (no risk) to 100 (very high risk of poor grade).\n"
+        "Return ONLY valid JSON with keys:\n"
+        "- \"risk_score\": integer 0-100\n"
+        "- \"risk_level\": string ('Low', 'Medium', 'High', 'Critical')\n"
+        "- \"explanation\": string (2 sentences)\n"
+        "- \"recommendations\": list of 3 short actionable strings\n"
+        "Return raw JSON only."
+    )
+    stats = {
+        "total_tasks": total, "completed_tasks": completed,
+        "open_unclaimed_tasks": open_tasks, "days_until_deadline": days_until_deadline,
+        "completion_percentage": int((completed / total * 100) if total > 0 else 0)
+    }
+    try:
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        generation_config = {"response_mime_type": "application/json", "temperature": 0.2}
+        prompt = f"System Instruction:\n{system_prompt}\n\nProject Stats:\n{json.dumps(stats)}"
+        response = model.generate_content(prompt, generation_config=generation_config)
+        if response.text:
+            return json.loads(response.text.strip())
+    except Exception as e:
+        logger.error(f"Error in predict_grade_risk: {e}")
+    return {"risk_score": 50, "risk_level": "Medium", "explanation": "Unable to compute risk.", "recommendations": ["Complete open tasks", "Assign unclaimed tasks", "Review deadlines"]}
+
+
+def suggest_workload_assignment(members: list, tasks: list) -> dict:
+    """
+    Suggests which team member should take the next open task based on current workload.
+    """
+    if not members:
+        return {"suggested_user": None, "reasoning": "No members found."}
+    member_load = {}
+    for m in members:
+        uid = m["id"]
+        name = m.get("username") or m.get("first_name", "Unknown")
+        active = len([t for t in tasks if t.get("assigned_to") == uid and t.get("status") == "claimed"])
+        member_load[uid] = {"name": name, "active_tasks": active, "user": m}
+    best_uid = min(member_load, key=lambda uid: member_load[uid]["active_tasks"])
+    best = member_load[best_uid]
+    return {
+        "suggested_user": best["user"],
+        "suggested_name": best["name"],
+        "current_task_count": best["active_tasks"],
+        "reasoning": f"{best['name']} has the lightest workload ({best['active_tasks']} active tasks).",
+        "all_loads": [{"name": v["name"], "active_tasks": v["active_tasks"]} for v in member_load.values()]
+    }

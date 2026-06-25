@@ -69,8 +69,27 @@ def init_db():
     try:
         cursor.execute("ALTER TABLE tasks ADD COLUMN blocked_by INTEGER REFERENCES tasks(id) ON DELETE SET NULL;")
     except sqlite3.OperationalError:
-        # Column already exists
         pass
+
+    # Try adding priority column to tasks table
+    try:
+        cursor.execute("ALTER TABLE tasks ADD COLUMN priority TEXT DEFAULT 'medium' CHECK (priority IN ('high', 'medium', 'low'));")
+    except sqlite3.OperationalError:
+        pass
+
+    # Task comments table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS task_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        task_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        username TEXT,
+        text TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    """)
     
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS nudges (
@@ -293,14 +312,14 @@ def is_task_blocked(task_id: int):
         return True
     return False
 
-def create_task(group_id: int, description: str, due_date: str = None, assigned_to: int = None, blocked_by: int = None):
+def create_task(group_id: int, description: str, due_date: str = None, assigned_to: int = None, blocked_by: int = None, priority: str = 'medium'):
     """Creates a new task in the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
     status = "claimed" if assigned_to else "open"
     cursor.execute(
-        "INSERT INTO tasks (group_id, description, due_date, assigned_to, status, blocked_by) VALUES (?, ?, ?, ?, ?, ?)",
-        (group_id, description, due_date, assigned_to, status, blocked_by)
+        "INSERT INTO tasks (group_id, description, due_date, assigned_to, status, blocked_by, priority) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (group_id, description, due_date, assigned_to, status, blocked_by, priority)
     )
     task_id = cursor.lastrowid
     conn.commit()
@@ -740,3 +759,54 @@ def get_inactive_users_for_group(group_id: int, inactive_days: float = 3.0):
     conn.close()
     return inactive_members
 
+
+# --- Task Priority & Comments ---
+
+def set_task_priority(task_id: int, priority: str):
+    """Updates the priority of a task ('high', 'medium', 'low')."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tasks SET priority = ? WHERE id = ?", (priority, task_id))
+    conn.commit()
+    conn.close()
+
+def add_task_comment(task_id: int, user_id: int, username: str, text: str):
+    """Appends a comment to a task."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO task_comments (task_id, user_id, username, text) VALUES (?, ?, ?, ?)",
+        (task_id, user_id, username, text)
+    )
+    conn.commit()
+    conn.close()
+
+def get_task_comments(task_id: int):
+    """Returns all comments for a task in chronological order."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM task_comments WHERE task_id = ? ORDER BY timestamp ASC",
+        (task_id,)
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+def get_group_activity(group_id: int, limit: int = 30):
+    """Returns a chronological activity feed of recent task completions and claims."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """SELECT t.id, t.description, t.status, t.completed_at, t.created_at,
+                  u.first_name as assignee_first_name, u.username as assignee_username
+           FROM tasks t
+           LEFT JOIN users u ON t.assigned_to = u.id
+           WHERE t.group_id = ?
+           ORDER BY COALESCE(t.completed_at, t.created_at) DESC
+           LIMIT ?""",
+        (group_id, limit)
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows

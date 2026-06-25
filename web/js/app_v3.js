@@ -8,6 +8,7 @@ let currentGroupId = null;
 let currentTasks = [];
 let parsedTasks = [];
 let currentUser = null;
+let showOnlyMyTasks = false;
 
 const BOT_COMMANDS = [
     {
@@ -616,6 +617,75 @@ function setupEventListeners() {
             }
         });
     });
+
+    // Theme toggle
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');
+    if (btnThemeToggle) {
+        const savedTheme = localStorage.getItem('syncup_theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        btnThemeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
+        btnThemeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('syncup_theme', newTheme);
+            btnThemeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+        });
+    }
+
+    // My Tasks filter
+    const btnMyTasksFilter = document.getElementById('btn-my-tasks-filter');
+    if (btnMyTasksFilter) {
+        btnMyTasksFilter.addEventListener('click', () => {
+            showOnlyMyTasks = !showOnlyMyTasks;
+            btnMyTasksFilter.classList.toggle('active', showOnlyMyTasks);
+            renderTasks(currentTasks);
+        });
+    }
+
+    // Grade risk predictor
+    const btnPredictRisk = document.getElementById('btn-predict-risk');
+    if (btnPredictRisk) {
+        btnPredictRisk.addEventListener('click', handlePredictRisk);
+    }
+
+    // Meeting minutes generator
+    const btnGenMinutes = document.getElementById('btn-gen-minutes');
+    if (btnGenMinutes) {
+        btnGenMinutes.addEventListener('click', handleGenerateMinutes);
+    }
+
+    // Workload balancer
+    const btnWorkloadSuggest = document.getElementById('btn-workload-suggest');
+    if (btnWorkloadSuggest) {
+        btnWorkloadSuggest.addEventListener('click', handleWorkloadSuggest);
+    }
+
+    // Task comments modal closing
+    const btnCloseCommentsModal = document.getElementById('btn-close-comments-modal');
+    if (btnCloseCommentsModal) {
+        btnCloseCommentsModal.addEventListener('click', () => {
+            document.getElementById('comments-modal').classList.remove('active');
+        });
+    }
+    const commentsModal = document.getElementById('comments-modal');
+    if (commentsModal) {
+        commentsModal.addEventListener('click', (e) => {
+            if (e.target === commentsModal) commentsModal.classList.remove('active');
+        });
+    }
+
+    // Task comment submission
+    const btnSubmitComment = document.getElementById('btn-submit-comment');
+    if (btnSubmitComment) {
+        btnSubmitComment.addEventListener('click', submitComment);
+    }
+
+    // PDF receipt export
+    const btnExportPdf = document.getElementById('btn-export-pdf');
+    if (btnExportPdf) {
+        btnExportPdf.addEventListener('click', exportReceiptPdf);
+    }
 }
 
 // Helpers for visual premium group selector UI
@@ -754,6 +824,8 @@ function loadGroupData(groupId) {
     fetchNudges(groupId);
     fetchHealth(groupId);
     fetchPeerReviews(groupId);
+    fetchActivity(groupId);
+    
     // Reset inputs
     rubricPreviewSection.classList.add('hidden');
     rubricInput.value = '';
@@ -780,13 +852,34 @@ async function fetchTasks(groupId) {
 function renderTasks(tasks) {
     tasksTableBody.innerHTML = '';
     
-    if (tasks.length === 0) {
-        tasksTableBody.innerHTML = '<tr><td colspan="5" class="muted">No tasks generated yet. Paste a syllabus/rubric above to populate project tasks!</td></tr>';
+    let tasksToRender = tasks;
+    if (showOnlyMyTasks && currentUser) {
+        tasksToRender = tasks.filter(t => t.assigned_to === currentUser.user_id);
+    }
+    
+    if (tasksToRender.length === 0) {
+        if (showOnlyMyTasks) {
+            tasksTableBody.innerHTML = '<tr><td colspan="6" class="muted">No tasks assigned to you yet. Claim some in the Telegram group using /claim!</td></tr>';
+        } else {
+            tasksTableBody.innerHTML = '<tr><td colspan="6" class="muted">No tasks generated yet. Paste a syllabus/rubric above to populate project tasks!</td></tr>';
+        }
         return;
     }
 
-    tasks.forEach(task => {
+    tasksToRender.forEach(task => {
         const tr = document.createElement('tr');
+        
+        // Add overdue class to row if uncompleted and overdue
+        if (task.status !== 'completed' && task.due_date) {
+            const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+            if (datePattern.test(task.due_date.trim())) {
+                const dueTime = new Date(task.due_date).getTime();
+                const nowTime = new Date().setHours(0, 0, 0, 0);
+                if (dueTime < nowTime) {
+                    tr.className = 'overdue-row';
+                }
+            }
+        }
         
         let statusBadge = '';
         if (task.status === 'open') {
@@ -826,17 +919,54 @@ function renderTasks(tasks) {
         } else {
             actionBtn = '✔️';
         }
+        
+        let commentBtn = `<button class="btn-secondary btn-sm" onclick="openCommentsModal(${task.id}, '${task.description.replace(/'/g, "\\'")}')" style="margin-left: 5px; font-size: 11.5px; padding: 4px 8px; border-radius: 8px; font-weight:500;">💬 Comments</button>`;
+
+        let priBadge = '';
+        const pri = task.priority || 'medium';
+        if (pri === 'high') {
+            priBadge = `<span class="priority-badge high" onclick="cyclePriority(${task.id}, '${pri}')" title="High Priority - Click to cycle">🔴</span>`;
+        } else if (pri === 'low') {
+            priBadge = `<span class="priority-badge low" onclick="cyclePriority(${task.id}, '${pri}')" title="Low Priority - Click to cycle">🟢</span>`;
+        } else {
+            priBadge = `<span class="priority-badge medium" onclick="cyclePriority(${task.id}, '${pri}')" title="Medium Priority - Click to cycle">🟡</span>`;
+        }
 
         tr.innerHTML = `
             <td style="font-family: monospace; font-weight: bold;">#${task.id}</td>
+            <td>${priBadge}</td>
             <td style="font-weight: 500;">${task.description}${blockerLabel}</td>
             <td>${assigneeText}</td>
-            <td><span class="badge" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.05);color:var(--text-secondary);">${task.due_date || 'N/A'}</span></td>
-            <td>${actionBtn}</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.05);color:var(--text-secondary);">${task.due_date || 'N/A'}${getDueDateCountdown(task.due_date)}</span></td>
+            <td>${actionBtn}${commentBtn}</td>
         `;
         
         tasksTableBody.appendChild(tr);
     });
+}
+
+// Helper countdown generator
+function getDueDateCountdown(dueDate) {
+    if (!dueDate) return '';
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+    if (!datePattern.test(dueDate.trim())) {
+        return '';
+    }
+    const dueTime = new Date(dueDate).getTime();
+    if (isNaN(dueTime)) return '';
+    const nowTime = new Date().setHours(0, 0, 0, 0);
+    const diffTime = dueTime - nowTime;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+        return `<br><span class="countdown-badge overdue">⚠️ Overdue by ${Math.abs(diffDays)}d</span>`;
+    } else if (diffDays === 0) {
+        return `<br><span class="countdown-badge overdue">⏰ Due Today!</span>`;
+    } else if (diffDays <= 2) {
+        return `<br><span class="countdown-badge due-soon">⏰ Due in ${diffDays}d</span>`;
+    } else {
+        return `<br><span class="countdown-badge plenty-time">📅 Due in ${diffDays}d</span>`;
+    }
 }
 
 // Complete task via dashboard
@@ -847,6 +977,15 @@ window.completeTask = async function(taskId) {
         });
         
         if (res.ok) {
+            // Trigger confetti!
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ec4899', '#be185d', '#8b5cf6', '#a78bfa', '#fbcfe8']
+                });
+            }
             // Reload
             loadGroupData(currentGroupId);
         } else {
@@ -855,6 +994,23 @@ window.completeTask = async function(taskId) {
         }
     } catch (err) {
         console.error("Error completing task:", err);
+    }
+}
+
+// Cycle priority handler
+window.cyclePriority = async function(taskId, currentPriority) {
+    const nextPriority = currentPriority === 'high' ? 'medium' : (currentPriority === 'medium' ? 'low' : 'high');
+    try {
+        const res = await authorizedFetch(`${API_BASE}/groups/${currentGroupId}/tasks/${taskId}/priority`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ priority: nextPriority })
+        });
+        if (res.ok) {
+            loadGroupData(currentGroupId);
+        }
+    } catch (err) {
+        console.error("Error cycling priority:", err);
     }
 }
 
@@ -909,6 +1065,36 @@ function renderLeaderboard(leaderboard) {
         const medal = idx < medals.length ? medals[idx] : '👤';
         const userLabel = user.username ? `@${user.username}` : user.first_name;
 
+        // Dynamic Achievement Badges
+        let badgesHtml = '';
+        if (user.completed_tasks >= 3) {
+            badgesHtml += `<span class="achievement-badge" title="Overachiever - Completed 3+ tasks! 👑">👑</span>`;
+        } else if (user.completed_tasks >= 1) {
+            badgesHtml += `<span class="achievement-badge" title="Active Teammate - Completed tasks! ✨">✨</span>`;
+        }
+        if (user.reliability_points >= 30) {
+            badgesHtml += `<span class="achievement-badge" title="Superstar - Earned 30+ XP! 🔥">🔥</span>`;
+        }
+
+        // Member progress ratio (completed vs assigned tasks)
+        const claimed = currentTasks.filter(t => t.assigned_to === user.id && t.status === 'claimed').length;
+        const completed = user.completed_tasks || 0;
+        const totalAssigned = claimed + completed;
+        const pct = totalAssigned > 0 ? Math.round((completed / totalAssigned) * 100) : 0;
+        
+        // Small 24x24 progress ring SVG
+        const r = 8;
+        const circ = 2 * Math.PI * r;
+        const off = circ - (pct / 100) * circ;
+        
+        const ringSvg = `
+            <svg class="member-progress-ring" width="24" height="24" viewBox="0 0 24 24" title="${pct}% completion progress">
+                <circle cx="12" cy="12" r="${r}" stroke="rgba(255, 255, 255, 0.05)" stroke-width="2.5" fill="transparent"/>
+                <circle cx="12" cy="12" r="${r}" stroke="var(--accent-pink)" stroke-width="2.5" fill="transparent"
+                        stroke-dasharray="${circ}" stroke-dashoffset="${off}" transform="rotate(-90 12 12)"/>
+            </svg>
+        `;
+
         const isSelf = currentUser && user.id === currentUser.user_id;
         const rateBtn = isSelf 
             ? '' 
@@ -917,8 +1103,9 @@ function renderLeaderboard(leaderboard) {
         li.innerHTML = `
             <div class="user-profile">
                 <span class="rank-medal">${medal}</span>
+                ${ringSvg}
                 <div class="user-info">
-                    <span class="user-name">${user.first_name} <span class="muted" style="font-size:11px;">(${userLabel})</span></span>
+                    <span class="user-name">${user.first_name}${badgesHtml} <span class="muted" style="font-size:11px;">(${userLabel})</span></span>
                     <span class="user-tasks-completed">Completed: ${user.completed_tasks} tasks</span>
                 </div>
             </div>
@@ -1021,6 +1208,7 @@ async function handleAddTask(e) {
     const due = document.getElementById('task-due').value;
     const blockedByVal = document.getElementById('task-blocked-by').value;
     const blocked_by = blockedByVal ? parseInt(blockedByVal) : null;
+    const priority = document.getElementById('task-priority').value || 'medium';
 
     if (!desc.trim()) return;
 
@@ -1028,7 +1216,7 @@ async function handleAddTask(e) {
         const res = await authorizedFetch(`${API_BASE}/groups/${currentGroupId}/tasks`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ description: desc, due_date: due, blocked_by: blocked_by })
+            body: JSON.stringify({ description: desc, due_date: due, blocked_by: blocked_by, priority: priority })
         });
 
         if (res.ok) {
@@ -1073,6 +1261,78 @@ async function handleRefreshStandup() {
 }
 
 // AI Rubric parsing via Gemini
+// ===== PDF Upload Helpers =====
+// Configure PDF.js worker (CDN-matched version)
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+/**
+ * Extract all text from a PDF File object using PDF.js.
+ * Returns a promise that resolves to the full text string.
+ */
+async function extractTextFromPdf(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n';
+    }
+    return fullText.trim();
+}
+
+/**
+ * Called when a PDF file is selected via the file input.
+ * target: 'rubric' | 'auditor'
+ */
+async function handlePdfFile(file, target) {
+    if (!file || file.type !== 'application/pdf') {
+        alert('Please select a valid .pdf file.');
+        return;
+    }
+
+    const statusEl = document.getElementById(`${target}-pdf-status`);
+    const zone = document.getElementById(`${target}-pdf-zone`);
+    const textarea = target === 'rubric'
+        ? document.getElementById('rubric-input')
+        : document.getElementById('draft-input');
+
+    statusEl.textContent = `⏳ Reading "${file.name}"...`;
+    zone.classList.add('loading');
+
+    try {
+        const text = await extractTextFromPdf(file);
+        if (!text) {
+            statusEl.textContent = '⚠️ Could not extract text (scanned/image PDF). Try copy-pasting instead.';
+            zone.classList.remove('loading');
+            return;
+        }
+        textarea.value = text;
+        statusEl.innerHTML = `✅ <strong>${file.name}</strong> loaded (${text.length.toLocaleString()} chars) — text inserted below`;
+        zone.classList.remove('loading');
+        zone.classList.add('loaded');
+    } catch (err) {
+        console.error('PDF extraction error:', err);
+        statusEl.textContent = '❌ Failed to read PDF. Make sure it is a text-based PDF.';
+        zone.classList.remove('loading');
+    }
+}
+
+/**
+ * Handles drag-and-drop onto the PDF zone.
+ */
+function handlePdfDrop(event, target) {
+    event.preventDefault();
+    const zone = document.getElementById(`${target}-pdf-zone`);
+    zone.classList.remove('dragging');
+    const file = event.dataTransfer.files[0];
+    handlePdfFile(file, target);
+}
+
 async function handleAnalyzeRubric() {
     const text = rubricInput.value.trim();
     if (!text) {
@@ -1570,5 +1830,342 @@ function renderCommandGuide() {
         
         container.appendChild(card);
     });
+}
+
+// ============================================================
+// NEW FEATURE HANDLERS AND HELPERS
+// ============================================================
+
+// New Feature Element Declarations
+const gradeRiskDays = document.getElementById('grade-risk-days');
+const gradeRiskResult = document.getElementById('grade-risk-result');
+const riskScoreCircle = document.getElementById('risk-score-circle');
+const riskLevelLabel = document.getElementById('risk-level-label');
+const riskExplanation = document.getElementById('risk-explanation');
+const riskRecommendations = document.getElementById('risk-recommendations');
+
+const meetingTranscriptInput = document.getElementById('meeting-transcript-input');
+const meetingMinutesResult = document.getElementById('meeting-minutes-result');
+const minutesSummary = document.getElementById('minutes-summary');
+const minutesDecisions = document.getElementById('minutes-decisions');
+const minutesActions = document.getElementById('minutes-actions');
+
+const workloadResult = document.getElementById('workload-result');
+const workloadSuggestionBanner = document.getElementById('workload-suggestion-banner');
+const workloadBars = document.getElementById('workload-bars');
+
+const commentsModal = document.getElementById('comments-modal');
+const commentsTaskTitle = document.getElementById('comments-task-title');
+const commentsList = document.getElementById('comments-list');
+const commentsTaskId = document.getElementById('comments-task-id');
+const commentInput = document.getElementById('comment-input');
+const btnSubmitComment = document.getElementById('btn-submit-comment');
+
+const activityTimelineList = document.getElementById('activity-timeline-list');
+
+// Task comments modal logic
+window.openCommentsModal = async function(taskId, taskDescription) {
+    commentsTaskId.value = taskId;
+    commentsTaskTitle.textContent = `Task #${taskId}: "${taskDescription}"`;
+    commentInput.value = '';
+    commentsList.innerHTML = '<p class="muted">Loading comments...</p>';
+    commentsModal.classList.add('active');
+    
+    await fetchComments(taskId);
+};
+
+async function fetchComments(taskId) {
+    try {
+        const res = await authorizedFetch(`${API_BASE}/groups/${currentGroupId}/tasks/${taskId}/comments`);
+        if (res.ok) {
+            const data = await res.json();
+            renderComments(data.comments);
+        } else {
+            commentsList.innerHTML = '<p class="muted" style="color:#f43f5e;">Failed to load comments.</p>';
+        }
+    } catch (err) {
+        console.error("Error loading comments:", err);
+        commentsList.innerHTML = '<p class="muted" style="color:#f43f5e;">Error loading comments.</p>';
+    }
+}
+
+function renderComments(comments) {
+    commentsList.innerHTML = '';
+    if (!comments || comments.length === 0) {
+        commentsList.innerHTML = '<p class="muted">No comments yet. Be the first to start the discussion! 🌸</p>';
+        return;
+    }
+    
+    comments.forEach(comment => {
+        const div = document.createElement('div');
+        div.className = 'comment-item';
+        
+        const dateStr = new Date(comment.timestamp).toLocaleDateString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+        
+        div.innerHTML = `
+            <div class="comment-author">@${comment.username}</div>
+            <div class="comment-text">${comment.text}</div>
+            <div class="comment-time">${dateStr}</div>
+        `;
+        commentsList.appendChild(div);
+    });
+}
+
+async function submitComment() {
+    const taskId = commentsTaskId.value;
+    const text = commentInput.value.trim();
+    if (!text) return;
+    
+    btnSubmitComment.disabled = true;
+    btnSubmitComment.textContent = "Posting... 💬";
+    
+    try {
+        const res = await authorizedFetch(`${API_BASE}/groups/${currentGroupId}/tasks/${taskId}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        if (res.ok) {
+            commentInput.value = '';
+            await fetchComments(taskId);
+        } else {
+            alert("Failed to submit comment.");
+        }
+    } catch (err) {
+        console.error("Error submitting comment:", err);
+    } finally {
+        btnSubmitComment.disabled = false;
+        btnSubmitComment.textContent = "Post Comment 💬";
+    }
+}
+
+// AI Grade Risk Predictor
+async function handlePredictRisk() {
+    const btnPredictRisk = document.getElementById('btn-predict-risk');
+    const days = gradeRiskDays.value || 14;
+    btnPredictRisk.disabled = true;
+    btnPredictRisk.textContent = "Predicting... 🎯";
+    
+    try {
+        const res = await authorizedFetch(`${API_BASE}/groups/${currentGroupId}/grade-risk?days_until_deadline=${days}`);
+        if (res.ok) {
+            const data = await res.json();
+            
+            gradeRiskResult.classList.remove('hidden');
+            riskScoreCircle.textContent = data.risk_score;
+            
+            // Set circle class based on risk level
+            riskScoreCircle.className = 'risk-score-circle';
+            const rl = data.risk_level.toLowerCase();
+            if (rl.includes('low')) {
+                riskScoreCircle.classList.add('low');
+            } else if (rl.includes('medium')) {
+                riskScoreCircle.classList.add('medium');
+            } else if (rl.includes('critical')) {
+                riskScoreCircle.classList.add('critical');
+            } else {
+                riskScoreCircle.classList.add('high');
+            }
+            
+            riskLevelLabel.textContent = data.risk_level;
+            riskExplanation.textContent = data.explanation;
+            
+            riskRecommendations.innerHTML = '';
+            if (data.recommendations && data.recommendations.length > 0) {
+                data.recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.className = 'parsed-task-item';
+                    li.innerHTML = `🌟 ${rec}`;
+                    riskRecommendations.appendChild(li);
+                });
+            } else {
+                riskRecommendations.innerHTML = '<li class="muted">All systems nominal! Excellent work.</li>';
+            }
+        }
+    } catch (err) {
+        console.error("Error predicting grade risk:", err);
+    } finally {
+        btnPredictRisk.disabled = false;
+        btnPredictRisk.textContent = "Predict Grade Risk 🎯";
+    }
+}
+
+// AI Meeting Minutes
+async function handleGenerateMinutes() {
+    const btnGenMinutes = document.getElementById('btn-gen-minutes');
+    const text = meetingTranscriptInput.value.trim();
+    if (!text) {
+        alert("Please paste some transcript or notes first.");
+        return;
+    }
+    
+    btnGenMinutes.disabled = true;
+    btnGenMinutes.textContent = "Generating... 📝";
+    
+    try {
+        const res = await authorizedFetch(`${API_BASE}/groups/${currentGroupId}/meeting-minutes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transcript_text: text })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            
+            meetingMinutesResult.classList.remove('hidden');
+            minutesSummary.textContent = data.summary || 'None';
+            
+            minutesDecisions.innerHTML = '';
+            if (data.decisions && data.decisions.length > 0) {
+                data.decisions.forEach(dec => {
+                    const li = document.createElement('li');
+                    li.className = 'parsed-task-item';
+                    li.innerHTML = `🤝 ${dec}`;
+                    minutesDecisions.appendChild(li);
+                });
+            } else {
+                minutesDecisions.innerHTML = '<li class="muted">No decisions explicitly recorded.</li>';
+            }
+            
+            minutesActions.innerHTML = '';
+            if (data.action_items && data.action_items.length > 0) {
+                data.action_items.forEach(action => {
+                    const li = document.createElement('li');
+                    li.className = 'parsed-task-item';
+                    li.innerHTML = `🎯 ${action.task} (Assigned to: ${action.assignee || 'Unassigned'})`;
+                    minutesActions.appendChild(li);
+                });
+            } else {
+                minutesActions.innerHTML = '<li class="muted">No action items recorded.</li>';
+            }
+        }
+    } catch (err) {
+        console.error("Error generating meeting minutes:", err);
+    } finally {
+        btnGenMinutes.disabled = false;
+        btnGenMinutes.textContent = "Generate Minutes 📝";
+    }
+}
+
+// AI Workload Balancer
+async function handleWorkloadSuggest() {
+    const btnWorkloadSuggest = document.getElementById('btn-workload-suggest');
+    btnWorkloadSuggest.disabled = true;
+    btnWorkloadSuggest.textContent = "Analysing... ⚖️";
+    
+    try {
+        const res = await authorizedFetch(`${API_BASE}/groups/${currentGroupId}/workload-suggest`);
+        if (res.ok) {
+            const data = await res.json();
+            
+            workloadResult.classList.remove('hidden');
+            workloadSuggestionBanner.innerHTML = `💡 <strong>Recommendation:</strong> ${data.suggestion}`;
+            
+            workloadBars.innerHTML = '';
+            if (data.workloads) {
+                const maxTasks = Math.max(...Object.values(data.workloads), 1);
+                
+                Object.entries(data.workloads).forEach(([member, count]) => {
+                    const pct = Math.round((count / maxTasks) * 100);
+                    const row = document.createElement('div');
+                    row.className = 'workload-bar-row';
+                    row.innerHTML = `
+                        <div class="workload-bar-label">${member}</div>
+                        <div class="workload-bar-track">
+                            <div class="workload-bar-fill" style="width: ${pct}%;"></div>
+                        </div>
+                        <div class="workload-bar-count">${count} tasks</div>
+                    `;
+                    workloadBars.appendChild(row);
+                });
+            }
+        }
+    } catch (err) {
+        console.error("Error fetching workload suggestion:", err);
+    } finally {
+        btnWorkloadSuggest.disabled = false;
+        btnWorkloadSuggest.textContent = "Analyse Workload ⚖️";
+    }
+}
+
+// Activity Timeline
+async function fetchActivity(groupId) {
+    try {
+        const res = await authorizedFetch(`${API_BASE}/groups/${groupId}/activity`);
+        if (res.ok) {
+            const data = await res.json();
+            renderActivity(data.activity);
+        }
+    } catch (err) {
+        console.error("Error fetching activity timeline:", err);
+    }
+}
+
+function renderActivity(activity) {
+    if (!activityTimelineList) return;
+    activityTimelineList.innerHTML = '';
+    
+    if (!activity || activity.length === 0) {
+        activityTimelineList.innerHTML = '<p class="muted">No recent activity. Complete or claim tasks to see them here.</p>';
+        return;
+    }
+    
+    activity.forEach(act => {
+        const item = document.createElement('div');
+        item.className = 'timeline-item';
+        
+        let dotClass = '';
+        if (act.action.toLowerCase().includes('completed') || act.action.toLowerCase().includes('done')) {
+            dotClass = 'completed';
+        } else if (act.action.toLowerCase().includes('claimed')) {
+            dotClass = 'claimed';
+        }
+        
+        const dateStr = new Date(act.timestamp).toLocaleDateString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+        
+        item.innerHTML = `
+            <div class="timeline-dot ${dotClass}"></div>
+            <div class="timeline-content">
+                <div class="timeline-desc">@${act.username} ${act.action}</div>
+                <div class="timeline-meta">${dateStr}</div>
+            </div>
+        `;
+        activityTimelineList.appendChild(item);
+    });
+}
+
+// Print / Export Receipt PDF
+function exportReceiptPdf() {
+    const text = receiptContent.textContent;
+    if (!text || text.includes("No tasks")) {
+        alert("No receipt content to export.");
+        return;
+    }
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>SyncUp AI - Contribution Receipt</title>
+            <style>
+                body {
+                    font-family: monospace;
+                    padding: 40px;
+                    line-height: 1.6;
+                    color: #1a0010;
+                    white-space: pre-wrap;
+                    background: #ffffff;
+                }
+                @media print {
+                    body {
+                        padding: 0;
+                    }
+                }
+            </style>
+        </head>
+        <body>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
 }
 

@@ -9,6 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style_v3.css">
+    <!-- PDF.js for client-side PDF text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- canvas-confetti for task completion celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <div class="ambient-glow glow-1"></div>
@@ -174,6 +178,7 @@
                 <button id="btn-refresh" class="btn-icon" title="Refresh Dashboard">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                 </button>
+                <button id="btn-theme-toggle" class="btn-icon" title="Toggle Light/Dark Mode">🌙</button>
                 <button id="btn-logout" class="btn-secondary btn-sm" style="border-radius: 30px;">Logout</button>
             </div>
         </header>
@@ -194,6 +199,13 @@
                         <div class="banner-text">
                             <strong>Ghosting Risk Alert:</strong> <span id="health-banner-text"></span>
                         </div>
+                    </div>
+
+                    <!-- Group Health Score Pill (NEW) -->
+                    <div id="group-health-score-banner" class="health-score-banner hidden">
+                        <span class="health-score-label">Group Health Score</span>
+                        <span id="health-score-value" class="health-score-pill">—</span>
+                        <span id="health-score-desc" class="health-score-desc"></span>
                     </div>
 
                     <!-- Project Completion -->
@@ -251,6 +263,7 @@
                         <div class="card-header">
                             <h3>Project Deliverables Board</h3>
                             <div class="card-actions">
+                                <button id="btn-my-tasks-filter" class="btn-secondary btn-sm filter-toggle-btn" title="Show only my tasks">👤 My Tasks</button>
                                 <button id="btn-add-task-modal" class="btn-secondary btn-sm">+ Add Task</button>
                             </div>
                         </div>
@@ -258,11 +271,12 @@
                             <table class="tasks-table">
                                 <thead>
                                     <tr>
-                                        <th width="10%">ID</th>
-                                        <th width="40%">Description</th>
-                                        <th width="20%">Assignee</th>
+                                        <th width="8%">ID</th>
+                                        <th width="5%">Pri</th>
+                                        <th width="35%">Description</th>
+                                        <th width="18%">Assignee</th>
                                         <th width="15%">Due Date</th>
-                                        <th width="15%">Action</th>
+                                        <th width="19%">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tasks-table-body">
@@ -282,7 +296,16 @@
                             <span class="icon">🪄</span>
                         </div>
                         <div class="rubric-body" style="margin-top: 10px;">
-                            <p class="section-desc">Paste raw assignment rubric or syllabus text below. The AI will extract deliverables for preview.</p>
+                            <p class="section-desc">Paste raw assignment rubric or syllabus text below, or upload a PDF — the AI will extract deliverables for preview.</p>
+
+                            <!-- PDF Upload Zone (Rubric) -->
+                            <div class="pdf-upload-zone" id="rubric-pdf-zone" onclick="document.getElementById('rubric-pdf-input').click()" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handlePdfDrop(event,'rubric')">
+                                <input type="file" id="rubric-pdf-input" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0],'rubric')">
+                                <div class="pdf-upload-icon">📄</div>
+                                <div class="pdf-upload-label">Upload PDF Rubric / Syllabus</div>
+                                <div class="pdf-upload-sub" id="rubric-pdf-status">Click or drag &amp; drop a .pdf file here</div>
+                            </div>
+
                             <textarea id="rubric-input" placeholder="Paste assignment brief, PDF contents, or grading rubric lines here... e.g.
 Assignment 1 deliverables:
 - Database schema structure (Due: Week 2)
@@ -300,7 +323,7 @@ Assignment 1 deliverables:
                                     <!-- Rendered dynamically -->
                                 </ul>
                                 <div class="sync-actions">
-                                    <button id="btn-sync-tasks" class="btn-accent">Sync & Broadcast to Group Chat 🚀</button>
+                                    <button id="btn-sync-tasks" class="btn-accent">Sync &amp; Broadcast to Group Chat 🚀</button>
                                 </div>
                             </div>
                         </div>
@@ -313,7 +336,16 @@ Assignment 1 deliverables:
                             <span class="icon">🔍</span>
                         </div>
                         <div class="rubric-body" style="margin-top: 10px;">
-                            <p class="section-desc">Paste your group project draft or report below. Gemini AI will audit it against all deliverables in your deliverables board.</p>
+                            <p class="section-desc">Upload your group project draft as a PDF, or paste the text below. Gemini AI will audit it against all deliverables in your deliverables board.</p>
+
+                            <!-- PDF Upload Zone (Auditor) -->
+                            <div class="pdf-upload-zone" id="auditor-pdf-zone" onclick="document.getElementById('auditor-pdf-input').click()" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handlePdfDrop(event,'auditor')">
+                                <input type="file" id="auditor-pdf-input" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0],'auditor')">
+                                <div class="pdf-upload-icon">📄</div>
+                                <div class="pdf-upload-label">Upload PDF Draft / Report</div>
+                                <div class="pdf-upload-sub" id="auditor-pdf-status">Click or drag &amp; drop a .pdf file here</div>
+                            </div>
+
                             <textarea id="draft-input" placeholder="Paste your draft report, codebase description, or essay text here for immediate rubric compliance grading..."></textarea>
                             
                             <div class="form-actions">
@@ -330,6 +362,82 @@ Assignment 1 deliverables:
                                 <ul id="audit-deliverables-list" class="parsed-tasks-list">
                                     <!-- Rendered dynamically -->
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Grade Risk Predictor (NEW) -->
+                    <div class="card col-6 grade-risk-card">
+                        <div class="card-header">
+                            <h3>AI Grade Risk Predictor</h3>
+                            <span class="icon">🎯</span>
+                        </div>
+                        <div class="rubric-body" style="margin-top: 10px;">
+                            <p class="section-desc">AI analyses your group's task progress and predicts the academic risk level for your project grade.</p>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                                <label style="font-size: 13px; color: var(--text-secondary);">Days until deadline:</label>
+                                <input type="number" id="grade-risk-days" value="14" min="1" max="90" style="width: 70px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-primary); font-size: 13px;">
+                            </div>
+                            <div class="form-actions">
+                                <button id="btn-predict-risk" class="btn-gradient">Predict Grade Risk 🎯</button>
+                            </div>
+                            <div id="grade-risk-result" class="preview-section hidden" style="margin-top: 16px;">
+                                <div class="risk-score-display">
+                                    <div class="risk-score-circle" id="risk-score-circle">50</div>
+                                    <div class="risk-score-info">
+                                        <strong id="risk-level-label">Medium Risk</strong>
+                                        <p id="risk-explanation" style="margin: 4px 0 0; font-size: 13px; color: var(--text-secondary);"></p>
+                                    </div>
+                                </div>
+                                <ul id="risk-recommendations" class="parsed-tasks-list" style="margin-top: 12px;"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Meeting Minutes Generator (NEW) -->
+                    <div class="card col-6 meeting-card">
+                        <div class="card-header">
+                            <h3>AI Meeting Minutes</h3>
+                            <span class="icon">📝</span>
+                        </div>
+                        <div class="rubric-body" style="margin-top: 10px;">
+                            <p class="section-desc">Paste your meeting notes or upload a PDF transcript — AI will extract decisions and action items automatically.</p>
+                            <!-- PDF Upload Zone (Meeting) -->
+                            <div class="pdf-upload-zone" id="meeting-pdf-zone" onclick="document.getElementById('meeting-pdf-input').click()" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handlePdfDrop(event,'meeting')">
+                                <input type="file" id="meeting-pdf-input" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0],'meeting')">
+                                <div class="pdf-upload-icon">📄</div>
+                                <div class="pdf-upload-label">Upload PDF Meeting Notes</div>
+                                <div class="pdf-upload-sub" id="meeting-pdf-status">Click or drag &amp; drop a .pdf file here</div>
+                            </div>
+                            <textarea id="meeting-transcript-input" placeholder="Paste meeting notes, chat transcript, or discussion text here..."></textarea>
+                            <div class="form-actions">
+                                <button id="btn-gen-minutes" class="btn-gradient">Generate Minutes 📝</button>
+                            </div>
+                            <div id="meeting-minutes-result" class="preview-section hidden" style="margin-top: 16px;">
+                                <h4>📋 Meeting Summary</h4>
+                                <p id="minutes-summary" class="meeting-minutes-output" style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 12px;"></p>
+                                <h4>✅ Decisions Made</h4>
+                                <ul id="minutes-decisions" class="parsed-tasks-list"></ul>
+                                <h4>🎯 Action Items</h4>
+                                <ul id="minutes-actions" class="parsed-tasks-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Workload Balancer (NEW) -->
+                    <div class="card col-12 workload-card">
+                        <div class="card-header">
+                            <h3>AI Workload Balancer</h3>
+                            <span class="icon">⚖️</span>
+                        </div>
+                        <div class="rubric-body" style="margin-top: 10px;">
+                            <p class="section-desc">See how tasks are distributed across your team and get a recommendation for who should take the next open task.</p>
+                            <div class="form-actions">
+                                <button id="btn-workload-suggest" class="btn-gradient">Analyse Workload ⚖️</button>
+                            </div>
+                            <div id="workload-result" class="preview-section hidden" style="margin-top: 16px;">
+                                <div id="workload-suggestion-banner" class="workload-suggestion"></div>
+                                <div id="workload-bars" style="margin-top: 12px;"></div>
                             </div>
                         </div>
                     </div>
@@ -388,7 +496,21 @@ Assignment 1 deliverables:
                         <div class="receipt-preview-box">
                             <pre id="receipt-content">Loading receipt details...</pre>
                         </div>
-                        <button id="btn-copy-receipt" class="btn-secondary btn-full">Copy Markdown Receipt 📋</button>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button id="btn-copy-receipt" class="btn-secondary btn-full">Copy Markdown Receipt 📋</button>
+                            <button id="btn-export-pdf" class="btn-secondary btn-full">Export as PDF 📥</button>
+                        </div>
+                    </div>
+
+                    <!-- Activity Timeline (NEW) -->
+                    <div class="card col-12 timeline-card">
+                        <div class="card-header">
+                            <h3>Activity Timeline</h3>
+                            <span class="icon">⏱️</span>
+                        </div>
+                        <div id="activity-timeline-list" class="activity-timeline">
+                            <p class="muted">No recent activity. Complete or claim tasks to see them here.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -464,6 +586,14 @@ Assignment 1 deliverables:
                             <option value="">No blocker (unblocked)</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority">
+                            <option value="medium" selected>🟡 Medium</option>
+                            <option value="high">🔴 High</option>
+                            <option value="low">🟢 Low</option>
+                        </select>
+                    </div>
                     <div class="form-actions" style="margin-top: 20px;">
                         <button type="submit" class="btn-gradient">Add Task</button>
                     </div>
@@ -502,6 +632,27 @@ Assignment 1 deliverables:
                         <button type="submit" class="btn-gradient">Submit Review</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Task Comments Modal (NEW) -->
+        <div id="comments-modal" class="modal">
+            <div class="modal-content card">
+                <div class="modal-header">
+                    <h3>💬 Task Comments</h3>
+                    <span id="btn-close-comments-modal" class="close-btn">&times;</span>
+                </div>
+                <div id="comments-task-title" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;"></div>
+                <div id="comments-list" class="comments-list">
+                    <p class="muted">No comments yet. Be the first!</p>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <input type="hidden" id="comments-task-id">
+                    <textarea id="comment-input" placeholder="Add a comment..." style="min-height: 60px;"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button id="btn-submit-comment" class="btn-gradient">Post Comment 💬</button>
+                </div>
             </div>
         </div>
 

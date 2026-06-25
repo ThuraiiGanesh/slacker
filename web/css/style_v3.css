@@ -1451,3 +1451,344 @@ select option {
     .main-content { padding: 18px 14px; }
     .chatbot-panel { width: 92vw; right: -8vw; }
 }
+
+/* ===================== PDF UPLOAD ZONE ===================== */
+.pdf-upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 18px 16px;
+    margin-bottom: 12px;
+    border: 2px dashed rgba(236, 72, 153, 0.35);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    text-align: center;
+    min-height: 80px;
+}
+
+.pdf-upload-zone:hover {
+    border-color: rgba(236, 72, 153, 0.7);
+    background: rgba(236, 72, 153, 0.06);
+    box-shadow: 0 0 18px rgba(236, 72, 153, 0.12);
+}
+
+.pdf-upload-zone.dragging {
+    border-color: #ec4899;
+    background: rgba(236, 72, 153, 0.1);
+    box-shadow: 0 0 24px rgba(236, 72, 153, 0.2);
+}
+
+.pdf-upload-zone.loaded {
+    border-color: rgba(16, 185, 129, 0.6);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.pdf-upload-zone.loading {
+    border-color: rgba(251, 191, 36, 0.6);
+    background: rgba(251, 191, 36, 0.05);
+    animation: pdf-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pdf-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.pdf-upload-icon {
+    font-size: 26px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 6px rgba(236, 72, 153, 0.3));
+}
+
+.pdf-upload-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-title);
+}
+
+.pdf-upload-sub {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* ============================================================
+   NEW FEATURE STYLES — additive only, zero visual regressions
+   ============================================================ */
+
+/* --- Priority Badges --- */
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    user-select: none;
+}
+.priority-badge:hover { transform: scale(1.2); opacity: 0.85; }
+.priority-badge.high { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.priority-badge.medium { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+.priority-badge.low { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+
+/* --- Countdown / Overdue Badges --- */
+.countdown-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+.countdown-badge.due-soon {
+    background: rgba(234, 179, 8, 0.15);
+    color: #ca8a04;
+}
+.countdown-badge.overdue {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+    animation: overdue-pulse 1.8s ease-in-out infinite;
+}
+.countdown-badge.plenty-time {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+}
+@keyframes overdue-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+.overdue-row td { background: rgba(239, 68, 68, 0.04); }
+
+/* --- Group Health Score Banner --- */
+.health-score-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 10px 18px;
+    margin-bottom: 12px;
+    backdrop-filter: blur(6px);
+    grid-column: 1 / -1;
+}
+.health-score-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.health-score-pill {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent-pink);
+    font-family: 'Outfit', sans-serif;
+    min-width: 40px;
+    text-align: center;
+}
+.health-score-desc {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+/* --- Achievement Badges --- */
+.achievement-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 13px;
+    margin-left: 4px;
+    cursor: default;
+}
+.achievement-badge[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transform: translateY(-120%);
+    left: 50%;
+    transform: translateX(-50%) translateY(-120%);
+    pointer-events: none;
+}
+
+/* --- Activity Timeline --- */
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 10px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-card);
+    position: relative;
+}
+.timeline-item:last-child { border-bottom: none; }
+.timeline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-pink);
+    margin-top: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+}
+.timeline-dot.completed { background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
+.timeline-dot.claimed { background: #eab308; box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15); }
+.timeline-content { flex: 1; min-width: 0; }
+.timeline-desc { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.timeline-meta { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+
+/* --- Risk Score Display --- */
+.risk-score-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+}
+.risk-score-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    flex-shrink: 0;
+    border: 4px solid var(--accent-pink);
+    color: var(--accent-pink);
+    background: rgba(236, 72, 153, 0.08);
+    transition: border-color 0.4s ease, color 0.4s ease;
+}
+.risk-score-circle.low { border-color: #22c55e; color: #22c55e; background: rgba(34, 197, 94, 0.08); }
+.risk-score-circle.medium { border-color: #eab308; color: #eab308; background: rgba(234, 179, 8, 0.08); }
+.risk-score-circle.high { border-color: #f97316; color: #f97316; background: rgba(249, 115, 22, 0.08); }
+.risk-score-circle.critical { border-color: #ef4444; color: #ef4444; background: rgba(239, 68, 68, 0.08); }
+.risk-score-info { flex: 1; }
+
+/* --- Workload Balancer --- */
+.workload-suggestion {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(139, 92, 246, 0.08));
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: var(--text-primary);
+}
+.workload-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+.workload-bar-label { min-width: 100px; color: var(--text-secondary); font-weight: 500; }
+.workload-bar-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.workload-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-pink), #8b5cf6);
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+.workload-bar-count { font-size: 11.5px; color: var(--text-secondary); min-width: 20px; text-align: right; }
+
+/* --- Meeting Minutes output --- */
+.meeting-minutes-output {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+/* --- Task Comments --- */
+.comments-list {
+    max-height: 220px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 0;
+}
+.comment-item {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+.comment-author {
+    font-weight: 700;
+    color: var(--accent-pink);
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+.comment-text { color: var(--text-primary); line-height: 1.5; }
+.comment-time { font-size: 10.5px; color: var(--text-secondary); margin-top: 3px; }
+
+/* --- Progress Ring per Member --- */
+.member-progress-ring {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+/* --- Filter Toggle Button active state --- */
+.filter-toggle-btn.active {
+    background: linear-gradient(135deg, var(--accent-pink), #8b5cf6);
+    color: white;
+    border-color: transparent;
+}
+
+/* --- Light Theme (dark default → light override) --- */
+body[data-theme="light"] {
+    --bg-page: #ffffff;
+    --text-primary: #1a0010;
+    --text-secondary: #5a3050;
+    --text-muted: #9a7090;
+    --surface-card: rgba(255, 255, 255, 0.9);
+}
+body[data-theme="light"] .card {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(236, 72, 153, 0.2);
+    box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+}
+body[data-theme="light"] .header {
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom-color: rgba(236, 72, 153, 0.15);
+}
+body[data-theme="light"] .tasks-table tbody tr:hover { background: rgba(236, 72, 153, 0.04); }

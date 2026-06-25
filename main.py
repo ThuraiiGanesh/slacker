@@ -2,6 +2,13 @@ import asyncio
 import logging
 import os
 import sys
+
+# Load .env file automatically if present
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, rely on system env vars
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import uvicorn

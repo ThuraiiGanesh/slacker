@@ -29,6 +29,7 @@ class TaskCreateRequest(BaseModel):
     due_date: Optional[str] = None
     assigned_to: Optional[int] = None
     blocked_by: Optional[int] = None
+    priority: Optional[str] = 'medium'
 
 class SendOtpRequest(BaseModel):
     username: str
@@ -48,6 +49,19 @@ class DraftAuditRequest(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     history: Optional[List[dict]] = []
+
+class MeetingMinutesRequest(BaseModel):
+    transcript_text: str
+
+class GradeRiskRequest(BaseModel):
+    days_until_deadline: Optional[int] = 14
+
+class TaskCommentRequest(BaseModel):
+    text: str
+
+class TaskPriorityRequest(BaseModel):
+    priority: str  # 'high', 'medium', 'low'
+
 
 
 
@@ -256,7 +270,7 @@ async def add_single_task(group_id: int, request: TaskCreateRequest, user = Depe
     if not request.description.strip():
         raise HTTPException(status_code=400, detail="Task description cannot be empty.")
         
-    task_id = models.create_task(group_id, request.description, request.due_date, request.assigned_to, request.blocked_by)
+    task_id = models.create_task(group_id, request.description, request.due_date, request.assigned_to, request.blocked_by, request.priority)
     task_details = models.get_task(task_id)
     
     # Broadcast
@@ -403,3 +417,61 @@ def chat_endpoint(request: ChatRequest):
     return {"reply": reply}
 
 
+# --- NEW FEATURE ROUTES ---
+
+@router.post("/groups/{group_id}/meeting-minutes")
+def generate_meeting_minutes_endpoint(group_id: int, request: MeetingMinutesRequest, user=Depends(get_current_user)):
+    """Generate structured meeting minutes from a raw transcript or notes."""
+    result = ai_helpers.generate_meeting_minutes(request.transcript_text)
+    return result
+
+
+@router.get("/groups/{group_id}/grade-risk")
+def get_grade_risk_endpoint(group_id: int, days_until_deadline: int = 14, user=Depends(get_current_user)):
+    """Predict grade risk for the group based on current task completion stats."""
+    tasks = models.get_group_tasks(group_id)
+    tasks_list = [dict(t) for t in tasks] if tasks else []
+    result = ai_helpers.predict_grade_risk(tasks_list, days_until_deadline)
+    return result
+
+
+@router.get("/groups/{group_id}/workload-suggest")
+def workload_suggest_endpoint(group_id: int, user=Depends(get_current_user)):
+    """Suggest which member should be assigned the next task based on workload balance."""
+    members = models.get_group_members(group_id)
+    tasks = models.get_group_tasks(group_id)
+    members_list = [dict(m) for m in (members or [])]
+    tasks_list = [dict(t) for t in (tasks or [])]
+    result = ai_helpers.suggest_workload_assignment(members_list, tasks_list)
+    return result
+
+
+@router.patch("/groups/{group_id}/tasks/{task_id}/priority")
+def update_task_priority(group_id: int, task_id: int, request: TaskPriorityRequest, user=Depends(get_current_user)):
+    """Update the priority of a task."""
+    if request.priority not in ('high', 'medium', 'low'):
+        raise HTTPException(status_code=400, detail="Priority must be 'high', 'medium', or 'low'")
+    models.set_task_priority(task_id, request.priority)
+    return {"success": True, "task_id": task_id, "priority": request.priority}
+
+
+@router.post("/groups/{group_id}/tasks/{task_id}/comments")
+def add_comment_endpoint(group_id: int, task_id: int, request: TaskCommentRequest, user=Depends(get_current_user)):
+    """Add a comment to a task."""
+    username = user.get("username") or user.get("first_name", "User")
+    models.add_task_comment(task_id, user["id"], username, request.text)
+    return {"success": True}
+
+
+@router.get("/groups/{group_id}/tasks/{task_id}/comments")
+def get_comments_endpoint(group_id: int, task_id: int, user=Depends(get_current_user)):
+    """Get all comments for a task."""
+    comments = models.get_task_comments(task_id)
+    return {"comments": comments}
+
+
+@router.get("/groups/{group_id}/activity")
+def get_activity_endpoint(group_id: int, user=Depends(get_current_user)):
+    """Get activity timeline for the group."""
+    activity = models.get_group_activity(group_id, limit=30)
+    return {"activity": activity}
