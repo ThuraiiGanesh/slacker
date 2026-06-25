@@ -1,0 +1,197 @@
+/* ──────────────────────────────────────────────────────────
+   'Xia Design System — Base Tokens
+   Brand palette, type scale, and semantic vars in one place.
+   Import this at the top of every page in the system.
+   ────────────────────────────────────────────────────────── */
+
+/* Webfonts: both families live on Google Fonts. ----------- */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+
+:root {
+
+  /* ── BRAND PALETTE ─────────────────────────────────────── */
+  --ink:      #201020;   /* Midnight Violet — headings & body text */
+  --deep:     #3c2a4b;   /* Midnight Violet 2 — secondary dark     */
+  --velvet:   #5d396d;   /* Velvet Purple — hover state on accent  */
+  --indigo:   #8b60a5;   /* Vintage Lavender — PRIMARY accent      */
+  --coral:    #e39797;   /* Light Coral — warm highlight           */
+
+  /* ── NEUTRALS (warm / lavender-tinted, not gray) ────────── */
+  --white:    #ffffff;
+  --off:      #f8f4fc;   /* lavender-tinted off-white              */
+  --g50:      #f3eef9;
+  --g100:     #e6ddf1;
+  --g200:     #d1bfe6;
+  --g400:     #9c84b5;
+  --g600:     #6e587d;
+  --g800:     #3c2a4b;   /* alias of --deep                        */
+
+  /* ── ACCENT TINTS ─────────────────────────────────────── */
+  --indigo-l: #f0e8f8;   /* lavender mist                          */
+  --coral-l:  #fdf1f1;   /* coral mist                             */
+
+  /* ── STATUS COLORS (kept conventional) ──────────────────── */
+  --green:    #16a34a;   --green-l: #dcfce7;
+  --amber:    #d97706;   --amber-l: #fef3c7;
+  --red:      #dc2626;   --red-l:   #fee2e2;
+  --blue:     #0369a1;   --blue-l:  #dbeafe;
+
+  /* ── SEMANTIC FOREGROUND / BACKGROUND ──────────────────── */
+  --fg:        var(--ink);
+  --fg-muted:  var(--g600);
+  --fg-soft:   var(--g400);
+  --fg-inv:    #ffffff;
+  --bg:        var(--white);
+  --bg-soft:   var(--off);
+  --bg-dark:   var(--ink);
+  --border:    var(--g100);
+  --border-strong: var(--g200);
+
+  /* ── TYPE FAMILIES ─────────────────────────────────────── */
+  --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  --font-body:    'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* ── TYPE SCALE ────────────────────────────────────────── */
+  --t-h1:       clamp(44px, 7vw, 84px);    /* Syne 800, -2.5px   */
+  --t-h2:       clamp(28px, 4vw, 46px);    /* Syne 700, -1.2px   */
+  --t-h3:       17px;                       /* Syne 700, -0.3px   */
+  --t-h4:       15px;                       /* Syne 700, -0.3px   */
+  --t-eyebrow:  11px;                       /* DM 600, +2px, UC   */
+  --t-lead:     17px;                       /* DM 300             */
+  --t-body:     16px;                       /* DM 400             */
+  --t-ui:       14px;                       /* DM 500             */
+  --t-meta:     12px;                       /* DM 500             */
+  --t-mono:     12px;
+
+  --tr-h1:      -2.5px;
+  --tr-h2:      -1.2px;
+  --tr-h3:      -0.3px;
+  --tr-eyebrow: 2px;
+
+  --lh-tight:   1.03;
+  --lh-snug:    1.1;
+  --lh-base:    1.6;
+  --lh-loose:   1.75;
+
+  /* ── SPACING ───────────────────────────────────────────── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+
+  --content-w: 1100px;   /* main column                          */
+  --content-narrow: 960px; /* focused (builder, workshop)         */
+  --section-y: 96px;
+  --section-y-mobile: 64px;
+  --nav-h:     62px;
+
+  /* ── RADII ─────────────────────────────────────────────── */
+  --r-xs:   5px;
+  --r-sm:   8px;       /* small inline                          */
+  --r-md:   11px;      /* buttons / inputs                       */
+  --r-lg:   16px;      /* card                                   */
+  --r-xl:   20px;      /* card / mockup window                   */
+  --r-pill: 100px;     /* chip / toggle                          */
+
+  /* ── ELEVATION (always purple-tinted, never neutral black) ── */
+  --shadow-sm:    0 1px 0 var(--g100);
+  --shadow-card:  0 14px 44px rgba(93, 57, 109, 0.14);
+  --shadow-mock:  0 24px 72px rgba(60, 42, 75, 0.10);
+  --shadow-btn:   0 10px 28px rgba(139, 96, 165, 0.30);
+  --shadow-btn-strong: 0 0 0 4px rgba(139, 96, 165, 0.18), 0 10px 28px rgba(139, 96, 165, 0.35);
+
+  /* ── MOTION ─────────────────────────────────────────────── */
+  --ease:        cubic-bezier(.22, 1, .36, 1);   /* signature curve */
+  --t-micro:     180ms;
+  --t-base:      350ms;
+  --t-reveal:    750ms;
+  --t-count:     1200ms;
+
+  /* ── BACKDROP / GLOWS ──────────────────────────────────── */
+  --glow-indigo: 0 0 32px 4px rgba(139, 96, 165, 0.35);
+  --glow-coral:  0 0 32px 4px rgba(227, 151, 151, 0.30);
+  --nav-blur:    blur(20px) saturate(180%);
+  --nav-bg:      rgba(255, 255, 255, 0.88);
+}
+
+/* ──────────────────────────────────────────────────────────
+   SEMANTIC TYPE — class-style so non-design pages stay clean.
+   Use these instead of restating size+family on every block.
+   ────────────────────────────────────────────────────────── */
+.h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--t-h1);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-h1);
+  color: var(--ink);
+}
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-h2);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-h2);
+  color: var(--ink);
+}
+.h3, .h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--ink);
+}
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--tr-eyebrow);
+  text-transform: uppercase;
+  color: var(--g400);
+}
+.lead {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--t-lead);
+  line-height: var(--lh-loose);
+  color: var(--g600);
+}
+.body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--t-body);
+  line-height: var(--lh-base);
+  color: var(--ink);
+}
+.ui {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--t-ui);
+  color: var(--fg-muted);
+}
+.meta {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--t-meta);
+  color: var(--g400);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--t-mono);
+}
+
+/* The signature three-part section opener.
+   <span class="eyebrow">…</span><h2>…</h2><p class="lead">…</p> */
+.intro > .eyebrow { margin-bottom: 14px; }
+.intro > h2,
+.intro > .h2     { margin-bottom: 14px; }

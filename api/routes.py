@@ -429,7 +429,7 @@ def generate_meeting_minutes_endpoint(group_id: int, request: MeetingMinutesRequ
 @router.get("/groups/{group_id}/grade-risk")
 def get_grade_risk_endpoint(group_id: int, days_until_deadline: int = 14, user=Depends(get_current_user)):
     """Predict grade risk for the group based on current task completion stats."""
-    tasks = models.get_group_tasks(group_id)
+    tasks = models.get_tasks_for_group(group_id)
     tasks_list = [dict(t) for t in tasks] if tasks else []
     result = ai_helpers.predict_grade_risk(tasks_list, days_until_deadline)
     return result
@@ -439,11 +439,17 @@ def get_grade_risk_endpoint(group_id: int, days_until_deadline: int = 14, user=D
 def workload_suggest_endpoint(group_id: int, user=Depends(get_current_user)):
     """Suggest which member should be assigned the next task based on workload balance."""
     members = models.get_group_members(group_id)
-    tasks = models.get_group_tasks(group_id)
+    tasks = models.get_tasks_for_group(group_id)
     members_list = [dict(m) for m in (members or [])]
     tasks_list = [dict(t) for t in (tasks or [])]
     result = ai_helpers.suggest_workload_assignment(members_list, tasks_list)
-    return result
+    
+    # Format to align with frontend expectations: count of tasks per member name
+    workloads = {item["name"]: item["active_tasks"] for item in result.get("all_loads", [])}
+    return {
+        "suggestion": result.get("reasoning", "No suggestion available."),
+        "workloads": workloads
+    }
 
 
 @router.patch("/groups/{group_id}/tasks/{task_id}/priority")
@@ -459,7 +465,7 @@ def update_task_priority(group_id: int, task_id: int, request: TaskPriorityReque
 def add_comment_endpoint(group_id: int, task_id: int, request: TaskCommentRequest, user=Depends(get_current_user)):
     """Add a comment to a task."""
     username = user.get("username") or user.get("first_name", "User")
-    models.add_task_comment(task_id, user["id"], username, request.text)
+    models.add_task_comment(task_id, user["user_id"], username, request.text)
     return {"success": True}
 
 

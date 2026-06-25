@@ -552,30 +552,48 @@ function setupEventListeners() {
 
     // Chatbot Event Listeners
     if (chatbotLauncher) {
-        chatbotLauncher.addEventListener('click', () => {
-            chatbotPanel.classList.add('active');
-            if (chatbotBadge) {
-                chatbotBadge.classList.add('hidden');
+        chatbotLauncher.addEventListener('click', (e) => {
+            // Only toggle if click is directly on the launcher (not bubbled from panel)
+            if (e.target === chatbotLauncher || e.target === chatbotBadge || e.target.closest('.chatbot-launcher') === chatbotLauncher) {
+                const isOpen = chatbotPanel.classList.contains('active');
+                if (isOpen) {
+                    chatbotPanel.classList.remove('active');
+                } else {
+                    chatbotPanel.classList.add('active');
+                    if (chatbotBadge) chatbotBadge.classList.add('hidden');
+                    if (chatbotInput) chatbotInput.focus();
+                }
             }
         });
     }
 
     if (chatbotClose) {
-        chatbotClose.addEventListener('click', () => {
+        chatbotClose.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent bubbling to launcher
             chatbotPanel.classList.remove('active');
         });
     }
 
     if (chatbotSend) {
-        chatbotSend.addEventListener('click', handleChatbotSend);
+        chatbotSend.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent bubbling to launcher
+            handleChatbotSend();
+        });
     }
 
     if (chatbotInput) {
+        chatbotInput.addEventListener('click', (e) => e.stopPropagation()); // Prevent bubbling
         chatbotInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
+                e.stopPropagation();
                 handleChatbotSend();
             }
         });
+    }
+
+    // Prevent clicks inside chatbot panel from bubbling up to the launcher
+    if (chatbotPanel) {
+        chatbotPanel.addEventListener('click', (e) => e.stopPropagation());
     }
 
     // Command Guide Search and Filter
@@ -1297,9 +1315,15 @@ async function handlePdfFile(file, target) {
 
     const statusEl = document.getElementById(`${target}-pdf-status`);
     const zone = document.getElementById(`${target}-pdf-zone`);
-    const textarea = target === 'rubric'
-        ? document.getElementById('rubric-input')
-        : document.getElementById('draft-input');
+    
+    let textarea;
+    if (target === 'rubric') {
+        textarea = document.getElementById('rubric-input');
+    } else if (target === 'auditor') {
+        textarea = document.getElementById('draft-input');
+    } else if (target === 'meeting') {
+        textarea = document.getElementById('meeting-transcript-input');
+    }
 
     statusEl.textContent = `⏳ Reading "${file.name}"...`;
     zone.classList.add('loading');
@@ -2114,18 +2138,23 @@ function renderActivity(activity) {
         item.className = 'timeline-item';
         
         let dotClass = '';
-        if (act.action.toLowerCase().includes('completed') || act.action.toLowerCase().includes('done')) {
+        const actionStr = act.action || '';
+        if (actionStr.toLowerCase().includes('completed') || actionStr.toLowerCase().includes('done')) {
             dotClass = 'completed';
-        } else if (act.action.toLowerCase().includes('claimed')) {
+        } else if (actionStr.toLowerCase().includes('claimed')) {
             dotClass = 'claimed';
         }
         
-        const dateStr = new Date(act.timestamp).toLocaleDateString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+        const timestampVal = act.timestamp ? new Date(act.timestamp) : new Date();
+        const dateStr = isNaN(timestampVal.getTime()) 
+            ? 'Recent' 
+            : timestampVal.toLocaleDateString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
         
+        const usernameVal = act.username || 'System';
         item.innerHTML = `
             <div class="timeline-dot ${dotClass}"></div>
             <div class="timeline-content">
-                <div class="timeline-desc">@${act.username} ${act.action}</div>
+                <div class="timeline-desc">@${usernameVal} ${actionStr}</div>
                 <div class="timeline-meta">${dateStr}</div>
             </div>
         `;

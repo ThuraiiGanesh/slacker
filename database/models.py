@@ -803,10 +803,33 @@ def get_group_activity(group_id: int, limit: int = 30):
            FROM tasks t
            LEFT JOIN users u ON t.assigned_to = u.id
            WHERE t.group_id = ?
-           ORDER BY COALESCE(t.completed_at, t.created_at) DESC
+           ORDER BY COALESCE(t.completed_at, t.created_at, t.created_at) DESC
            LIMIT ?""",
         (group_id, limit)
     )
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    return rows
+    
+    activity = []
+    for r in rows:
+        status = r.get("status")
+        desc = r.get("description", "")
+        username = r.get("assignee_username") or r.get("assignee_first_name") or "System"
+        
+        if status == "completed":
+            action = f"completed task: \"{desc}\""
+            timestamp = r.get("completed_at") or r.get("created_at")
+        elif status == "claimed":
+            action = f"claimed task: \"{desc}\""
+            timestamp = r.get("created_at")
+        else:
+            action = f"created task: \"{desc}\""
+            timestamp = r.get("created_at")
+            username = "System"
+            
+        activity.append({
+            "username": username,
+            "action": action,
+            "timestamp": timestamp
+        })
+    return activity

@@ -1,0 +1,3142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pixel Isle — 探岛玩家 (Singapore Heritage App)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #bd3d97;
+    --grey: #e4eaee;
+    --blue: #0a5799;
+    --blue-deep: #073f72;
+    --water-hl: #1a6cb3;
+    --font-pixel: 'Press Start 2P', monospace;
+    --font-sans: 'Nunito', sans-serif;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    background: #121016;
+    font-family: var(--font-sans);
+    overflow: hidden;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Singapore pink+blue starfield background */
+  .starfield {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .45;
+  }
+  .starfield .layer {
+    position: absolute; inset: 0;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+  }
+  .star-a {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><g fill='%23bd3d97'><rect x='12' y='30' width='2' height='2'/><rect x='14' y='32' width='2' height='2'/><rect x='10' y='32' width='2' height='2'/><rect x='12' y='34' width='2' height='2'/><rect x='12' y='32' width='2' height='2'/></g><g fill='%230a5799'><rect x='80' y='100' width='2' height='2'/><rect x='82' y='102' width='2' height='2'/><rect x='78' y='102' width='2' height='2'/><rect x='80' y='104' width='2' height='2'/><rect x='80' y='102' width='2' height='2'/></g><g fill='%23bd3d97' opacity='.7'><rect x='128' y='60' width='2' height='2'/><rect x='130' y='62' width='2' height='2'/><rect x='126' y='62' width='2' height='2'/><rect x='128' y='64' width='2' height='2'/></g></svg>");
+    animation: starDrift 60s linear infinite;
+  }
+  .star-b {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><g fill='%230a5799' opacity='.6'><rect x='40' y='40' width='2' height='2'/><rect x='42' y='42' width='2' height='2'/><rect x='38' y='42' width='2' height='2'/></g><g fill='%23bd3d97' opacity='.5'><rect x='170' y='150' width='2' height='2'/><rect x='172' y='152' width='2' height='2'/></g><g fill='%230a5799' opacity='.5'><rect x='100' y='180' width='2' height='2'/></g></svg>");
+    animation: starDrift 110s linear infinite reverse;
+  }
+  @keyframes starDrift {
+    from { background-position: 0 0; }
+    to   { background-position: 320px -240px; }
+  }
+
+  /* Main workspace layout */
+  .workspace {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    gap: 40px;
+    padding: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .workspace {
+      flex-direction: column;
+      overflow-y: auto;
+      height: auto;
+      min-height: 100vh;
+      padding: 40px 10px;
+    }
+  }
+
+  /* Database Panel UI */
+  .db-panel {
+    width: 320px;
+    background: rgba(25, 20, 35, 0.85);
+    border: 1px solid rgba(189, 61, 151, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    height: 812px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 900px) {
+    .db-panel {
+      width: 100%;
+      max-width: 375px;
+      height: auto;
+      margin-top: 20px;
+    }
+  }
+
+  .db-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .db-title {
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    color: var(--pink);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .db-subtitle {
+    font-size: 12px;
+    color: #a898c0;
+  }
+
+  .db-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .db-console {
+    background: #0d0a11;
+    border-radius: 10px;
+    padding: 12px;
+    border: 1.5px solid #231b2e;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    color: #61dfa1;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+  }
+
+  .db-btn {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    background: var(--blue);
+    color: #fff;
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 3px 0 var(--blue-deep);
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-align: center;
+  }
+
+  .db-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--blue-deep);
+  }
+
+  .db-btn.reset {
+    background: #d63864;
+    box-shadow: 0 3px 0 #9e1b3e;
+  }
+
+  .db-btn.reset:active {
+    box-shadow: 0 1px 0 #9e1b3e;
+  }
+
+  /* Phone Simulator Frame */
+  .phone-frame {
+    position: relative;
+    width: 375px;
+    height: 812px;
+    background: #000;
+    border-radius: 48px;
+    box-shadow: 
+      0 0 0 10px #1e1b24,
+      0 0 0 12px #34303c,
+      0 20px 60px rgba(0, 0, 0, 0.8),
+      0 0 100px rgba(189, 61, 151, 0.15);
+    overflow: hidden;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  /* iOS Dynamic Island */
+  .phone-island {
+    position: absolute;
+    top: 13px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 28px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 9999;
+    box-shadow: inset 0 0.5px 2px rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), height 0.3s;
+  }
+
+  .phone-island.expanded {
+    width: 240px;
+    height: 38px;
+  }
+
+  .phone-island-content {
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  .phone-island.expanded .phone-island-content {
+    opacity: 1;
+  }
+
+  /* Internal phone view */
+  .phone-content {
+    position: absolute;
+    inset: 0;
+    border-radius: 36px;
+    overflow: hidden;
+    background: #e8e4f4;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+
+  /* Screens transition system */
+  .screen-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .screen.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: absolute;
+    top: 55px;
+    left: 12px;
+    right: 12px;
+    background: rgba(12, 6, 22, 0.94);
+    border: 1.5px solid var(--pink);
+    border-radius: 12px;
+    padding: 10px 14px;
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(-80px);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .toast-emoji {
+    font-size: 20px;
+  }
+
+  .toast-body {
+    flex: 1;
+  }
+
+  .toast-title {
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    color: var(--pink);
+    margin-bottom: 2px;
+  }
+
+  .toast-text {
+    font-size: 11px;
+    color: #e4eaee;
+    font-weight: 600;
+  }
+
+  /* App Theme configurations */
+  .app-dark {
+    background: #0e081c !important;
+    color: #f0e8ff !important;
+  }
+
+  .scrollable {
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .scrollable::-webkit-scrollbar {
+    display: none;
+  }
+
+  .animate-pulse-pixel {
+    animation: pixelPulse 1.5s steps(2, end) infinite;
+  }
+
+  @keyframes pixelPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .checkin-spark {
+    position: absolute;
+    pointer-events: none;
+    font-size: 18px;
+    animation: sparkFly 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    z-index: 99999;
+  }
+
+  @keyframes sparkFly {
+    0% {
+      transform: translate(0, 0) scale(0.5);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--dx), var(--dy)) scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  /* Custom Horizontal Scroll tags */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    padding: 8px 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-tag {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    background: rgba(10, 87, 153, 0.05);
+    color: var(--blue);
+    border: 1px solid rgba(10, 87, 153, 0.15);
+    transition: all 0.2s;
+  }
+
+  .filter-tag.active {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+
+  .filter-tag.feeling {
+    background: rgba(189, 61, 151, 0.05);
+    color: var(--pink);
+    border-color: rgba(189, 61, 151, 0.15);
+  }
+
+  .filter-tag.feeling.active {
+    background: var(--pink);
+    color: #fff;
+    border-color: var(--pink);
+  }
+
+  /* Pixel Progress Bar for Passport */
+  .pixel-progress-container {
+    background: #0d0a11;
+    border: 2px solid #231b2e;
+    height: 16px;
+    position: relative;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+
+  .pixel-progress-fill {
+    background: var(--pink);
+    height: 100%;
+    transition: width 0.4s ease;
+  }
+
+  .pixel-progress-ticks {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .pixel-progress-ticks span {
+    width: 2px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Trail Checklist Styles */
+  .trail-check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(10, 87, 153, 0.04);
+    border: 1px solid rgba(10, 87, 153, 0.08);
+    border-radius: 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .trail-check-item:hover {
+    background: rgba(10, 87, 153, 0.08);
+  }
+
+  .trail-check-box {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--blue);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--blue);
+    font-size: 10px;
+    background: #fff;
+  }
+
+  .trail-check-box.checked {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  /* ── Loader & Logo Reveal Styles ── */
+  .loader-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--grey);
+    z-index: 1000;
+    overflow: hidden;
+  }
+  .loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity .55s ease, transform .55s ease;
+  }
+  .tipbar {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .tip-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--pink);
+    color: #fff;
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--pink);
+  }
+  .tip-badge .lantern {
+    width: 8px; height: 10px;
+    background:
+      linear-gradient(#fff, #fff) 3px 0 / 2px 2px no-repeat,
+      linear-gradient(#fff, #fff) 2px 2px / 4px 1px no-repeat,
+      linear-gradient(#fff, #fff) 1px 3px / 6px 4px no-repeat,
+      linear-gradient(#fff, #fff) 2px 7px / 4px 1px no-repeat;
+    background-color: transparent;
+  }
+  .tip-text {
+    min-height: 40px;
+    color: var(--blue);
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    line-height: 1.6;
+    letter-spacing: .1px;
+    max-width: 280px;
+    transition: opacity .28s ease;
+  }
+  .tip-text.swap { opacity: 0; }
+  .tip-text b { color: var(--pink); font-weight: inherit; }
+  .progress {
+    display: flex; gap: 4px;
+    padding: 3px;
+    background: #fff;
+    box-shadow: 0 0 0 1.5px var(--blue);
+  }
+  .progress span {
+    width: 10px; height: 8px;
+    background: var(--grey);
+  }
+  .progress span.on { background: var(--pink); }
+  .prompt {
+    color: var(--blue);
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity .4s ease;
+    margin-top: -8px;
+  }
+  .prompt.show { opacity: 1; animation: blink 1.1s steps(2, end) infinite; }
+  .prompt .pink { color: var(--pink); }
+  
+  .whirl {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    display: grid;
+    place-items: center;
+    animation: whirlSpin 18s linear infinite;
+    transform: scale(0.85);
+  }
+  @keyframes whirlSpin {
+    to { transform: rotate(360deg); }
+  }
+  .orbit {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .orbit svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .orbit .ring {
+    fill: none;
+    stroke: var(--pink);
+    stroke-linecap: round;
+  }
+  .orbit-a { animation: orbitA 3.2s linear infinite; transform-origin: 50% 50%; }
+  .orbit-b { animation: orbitB 4.8s linear infinite reverse; transform-origin: 50% 50%; }
+  .orbit-c { animation: orbitC 6.5s linear infinite; transform-origin: 50% 50%; }
+  @keyframes orbitA { to { transform: rotate(360deg); } }
+  @keyframes orbitB { to { transform: rotate(360deg); } }
+  @keyframes orbitC { to { transform: rotate(360deg); } }
+
+  .comet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background: var(--pink);
+    box-shadow: 0 0 0 1.5px rgba(189,61,151,.15), 0 0 14px rgba(189,61,151,.55);
+  }
+  .comet.b { background: var(--blue); box-shadow: 0 0 0 1.5px rgba(10,87,153,.15), 0 0 14px rgba(10,87,153,.55); }
+  .comet-track {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 50%;
+  }
+  .comet-track .comet {
+    transform: translate(95px, 0);
+  }
+  .track-1 {
+    transform: rotateX(62deg);
+    animation: trackSpin 3.2s linear infinite;
+  }
+  .track-2 {
+    transform: rotateX(62deg) rotateZ(90deg);
+    animation: trackSpin 4.8s linear infinite reverse;
+  }
+  @keyframes trackSpin { to { transform: rotateX(62deg) rotate(360deg); } }
+  .track-2 { animation-name: trackSpin2; }
+  @keyframes trackSpin2 {
+    from { transform: rotateX(62deg) rotateZ(90deg) rotate(0deg); }
+    to   { transform: rotateX(62deg) rotateZ(90deg) rotate(360deg); }
+  }
+
+  .globe {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--blue);
+    box-shadow:
+      inset -14px -14px 40px rgba(0,0,0,.40),
+      inset 11px 11px 28px rgba(255,255,255,.06),
+      0 14px 40px rgba(10,87,153,.35),
+      0 0 0 1px rgba(10,87,153,.15);
+    z-index: 2;
+  }
+  .globe canvas.map {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 320px;
+    height: 160px;
+    transform: translateY(-50%);
+    image-rendering: pixelated;
+    animation: scrollMap 9s linear infinite;
+  }
+  @keyframes scrollMap {
+    from { transform: translate(0, -50%); }
+    to   { transform: translate(-160px, -50%); }
+  }
+  .globe .shade {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255,255,255,.22), rgba(255,255,255,0) 45%),
+      radial-gradient(circle at 70% 80%, rgba(0,0,0,.42), rgba(0,0,0,0) 55%),
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 60%, rgba(0,0,0,.25) 100%);
+  }
+  .globe .grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .18;
+  }
+
+  /* Logo reveal stage */
+  .logo-reveal-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--grey);
+    z-index: 1000;
+    gap: 20px;
+  }
+  .logo-reveal-container canvas {
+    width: 300px;
+    height: 300px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 10px 24px rgba(10,87,153,.18));
+  }
+  .logo-reveal-container .ready {
+    color: var(--blue);
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 1;
+    animation: blink 1.1s steps(2, end) infinite;
+    margin-top: 10px;
+  }
+
+  /* Additional Gacha/Shop Styles */
+  .gacha-machine {
+    background: #0d0a11;
+    border: 3px solid var(--blue);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 4px 15px rgba(10,87,153,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .gacha-screen {
+    width: 100%;
+    height: 150px;
+    background: #191423;
+    border: 2px solid var(--pink);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .gacha-shaker {
+    font-size: 64px;
+    animation: gachaShake 0.4s ease infinite;
+    display: inline-block;
+  }
+  @keyframes gachaShake {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    25% { transform: rotate(-8deg) translateY(-4px); }
+    75% { transform: rotate(8deg) translateY(-2px); }
+  }
+  .gacha-reveal {
+    animation: gachaPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes gachaPop {
+    0% { transform: scale(0.3); opacity: 0; }
+    70% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .gacha-handle {
+    width: 48px;
+    height: 48px;
+    background: var(--pink);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 0 #8a236a;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .gacha-handle:active {
+    transform: rotate(180deg) scale(0.95);
+  }
+  
+  /* Shop merchandise card */
+  .merch-card {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s;
+  }
+  .app-dark .merch-card {
+    background: rgba(255,255,255,0.02);
+  }
+  .merch-card:hover {
+    border-color: rgba(189, 61, 151, 0.2);
+  }
+  
+  /* Interactive quiz styling */
+  .quiz-container {
+    background: rgba(10, 87, 153, 0.05);
+    border: 1.5px dashed var(--blue);
+    border-radius: 12px;
+    padding: 10px;
+    margin-top: 10px;
+  }
+  .quiz-option {
+    background: #fff;
+    color: var(--blue);
+    border: 1px solid rgba(10, 87, 153, 0.2);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 10px;
+    margin-top: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    font-weight: 700;
+  }
+  .quiz-option:hover {
+    background: rgba(10, 87, 153, 0.06);
+    border-color: var(--blue);
+  }
+  .app-dark .quiz-option {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border-color: rgba(255,255,255,0.1);
+  }
+  .app-dark .quiz-option:hover {
+    background: rgba(255,255,255,0.1);
+  }
+  
+  /* Floating daily coin widget */
+  .floating-coin-btn {
+    position: absolute;
+    top: 55px;
+    right: 12px;
+    z-index: 101;
+    background: #ffd700;
+    color: #000;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-family: var(--font-pixel);
+    font-size: 6.5px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 2px 0 #b89f00;
+    animation: bounceCoin 2s infinite ease-in-out;
+  }
+  @keyframes bounceCoin {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="starfield" aria-hidden="true">
+  <div class="layer star-a"></div>
+  <div class="layer star-b"></div>
+</div>
+
+<div class="workspace">
+
+  <!-- LEFT: DB Console Inspector & Helpers -->
+  <div class="db-panel">
+    <div class="db-header">
+      <div class="db-title">⚙️ Local Database</div>
+      <div class="db-subtitle">Persisted state manager (localStorage)</div>
+    </div>
+    <div class="db-body">
+      <div style="font-size: 11.5px; color: #a898c0; line-height: 1.45;">
+        Real-time view of client-side database. Changes update the <b>探岛玩家</b> frame simulator dynamically.
+      </div>
+      <div class="db-console" id="dbConsole">Loading...</div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+        <button class="db-btn" onclick="tweakDB('coins', 50)">💰 Add +50 Coins</button>
+        <button class="db-btn" onclick="tweakDB('complete_trail', true)">🏮 Complete Chinese Trail</button>
+        <button class="db-btn" onclick="tweakDB('max_passport', true)">🧬 Max Out Passport Progress</button>
+        <button class="db-btn reset" onclick="resetAppDB()">🔄 Reset database</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: Interactive Phone Simulator Frame -->
+  <div class="phone-frame">
+    <!-- Dynamic Island -->
+    <div class="phone-island" id="island">
+      <div class="phone-island-content" id="islandContent">
+        <span>🇸🇬</span>
+        <span id="islandText">狮城茶迹 SG</span>
+      </div>
+    </div>
+
+    <!-- Screen wrapper -->
+    <div class="phone-content" id="phoneContent">
+      <div id="react-root" style="width: 100%; height: 100%; display: flex; flex-direction: column;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- React & Babel Scripts -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+
+/* ── Database Engine ─────────────────────────────────────────────── */
+const DB = {
+  get: (key, fallback) => {
+    try {
+      const val = localStorage.getItem('pixel_isle:' + key);
+      return val ? JSON.parse(val) : fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  set: (key, val) => {
+    try {
+      localStorage.setItem('pixel_isle:', 'active'); // marker
+      localStorage.setItem('pixel_isle:' + key, JSON.stringify(val));
+    } catch {}
+  },
+  clear: () => {
+    try {
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('pixel_isle:')) {
+          localStorage.removeItem(k);
+        }
+      });
+      window.dispatchEvent(new Event('local-db-updated'));
+    } catch {}
+  }
+};
+
+/* ── Styling Constants ──────────────────────────────────────────── */
+const PIK = '#bd3d97';   // pink
+const BLU = '#0a5799';   // blue
+const GRY = '#e4eaee';   // grey
+const FPX = "'Press Start 2P', monospace";
+const FSN = "'Nunito', sans-serif";
+
+/* ── Characters / 阅伴 ───────────────────────────────────────────── */
+const CHARS = [
+  { id:'mei',    name:'Mei (小梅)',    heritage:'Chinese Heritage',   tagline:'Lantern keeper of Chinatown', emoji:'🏮', accent:'#e85d75', bg:'#fff2f4', tier:'Common'  },
+  { id:'aisyah', name:'Aisyah (艾莎)', heritage:'Malay Heritage',     tagline:'Spirit of Kampong Glam',     emoji:'🌿', accent:'#38b06c', bg:'#f1fef6', tier:'Common'  },
+  { id:'arjun',  name:'Arjun (阿君)',  heritage:'Indian Heritage',    tagline:'Festival light of Little India', emoji:'🪔', accent:'#f08030', bg:'#fff8f0', tier:'Common'  },
+  { id:'claire', name:'Claire (克莱)', heritage:'Eurasian Heritage',  tagline:'Heritage quarter guide',     emoji:'🌺', accent:'#5b8de0', bg:'#f2f6ff', tier:'Rare'    },
+  { id:'nya',    name:'Nya (娘惹)',    heritage:'Peranakan Heritage', tagline:'Tile master of Joo Chiat',   emoji:'🪸', accent:'#3bbdb8', bg:'#f0fffe', tier:'Epic'    },
+];
+
+/* ── Core Singapore Ecosystem Locations / 狮城茶迹 ───────────────── */
+const DISTRICTS = [
+  { 
+    id: 'Merlion',     
+    x: 183, y: 225, 
+    emoji: '🦁', 
+    label: 'Merlion Park (鱼尾狮公园)',   
+    color: '#e85d75', 
+    defaultLocked: false, 
+    cost: 0,  
+    desc: 'The iconic half-fish, half-lion emblem of Singapore at Marina Bay, standing tall against the city skyline.',
+    feelings: ['Aesthetic', 'Chill'],
+    cultural: ['Colonial Singapore', 'Maritime Singapore'],
+    area: 'South',
+    amenities: ['Nearby Me', 'MRT Accessible', 'Wheelchair Accessible', 'Free Entry'],
+    heritageCategory: 'colonial',
+    story: "🦁 Mei says: 'Did you know? The Merlion was designed in 1964 as a logo for the tourism board, combining the legend of Sang Nila Utama and Singapore\'s history as a port!'",
+    quizQuestion: "What year was the Merlion logo designed?",
+    quizOptions: ["1964", "1972", "1985"],
+    quizAnswer: "1964"
+  },
+  { 
+    id: 'Chinatown',   
+    x: 148, y: 200, 
+    emoji: '🧧', 
+    label: 'Chinatown (牛车水)',      
+    color: '#f08030', 
+    defaultLocked: false, 
+    cost: 0,  
+    desc: 'Wander through historic shophouses, traditional lantern stalls, and street food markets representing Chinese Heritage.',
+    feelings: ['Foodie', 'Curious', 'Family Friendly'],
+    cultural: ['Chinese Heritage', 'Hawker Culture'],
+    area: 'South',
+    amenities: ['MRT Accessible', 'Wheelchair Accessible', 'Free Entry', 'Student Budget'],
+    heritageCategory: 'chinese',
+    story: "🧧 Mei says: 'The Chinese name \"Bullock Cart Water\" (牛车水) comes from the 19th century when water supply had to be hauled by bullock carts from wells!'",
+    quizQuestion: "Why is Chinatown called 'Bullock Cart Water'?",
+    quizOptions: ["Water was hauled by bullocks", "Bullocks bathed in the river", "A bullock cart festival occurred there"],
+    quizAnswer: "Water was hauled by bullocks"
+  },
+  { 
+    id: 'Arab St',     
+    x: 163, y: 152, 
+    emoji: '🕌', 
+    label: 'Kampong Glam (哈芝巷)',   
+    color: '#3bbdb8', 
+    defaultLocked: false, 
+    cost: 0,  
+    desc: 'Explore hipster boutiques, colorful murals, and Middle Eastern eateries near the historic Sultan Mosque.',
+    feelings: ['Creative', 'Aesthetic', 'Chill'],
+    cultural: ['Malay Heritage', 'Performing Arts', 'Local Art Scene'],
+    area: 'Central',
+    amenities: ['MRT Accessible', 'Free Entry', 'Within 30 Minutes'],
+    heritageCategory: 'malay',
+    story: "🕌 Aisyah says: 'This place was once a narrow street of shophouses where travelers from the Middle East stayed. Now it\'s a canvas for local street artists!'",
+    quizQuestion: "What is Kampong Glam famous for?",
+    quizOptions: ["Nutmeg plantations", "Middle Eastern traders and shophouses", "Cattle trading"],
+    quizAnswer: "Middle Eastern traders and shophouses"
+  },
+  { 
+    id: 'Little India',
+    x: 128, y: 148, 
+    emoji: '🪔', 
+    label: 'Little India (小印度)',   
+    color: '#bd3d97', 
+    defaultLocked: true,  
+    cost: 20, 
+    desc: 'An aromatic enclave of spice shops, flower garland weavers, and vibrant temple walls representing Indian Heritage.',
+    feelings: ['Exciting', 'Curious', 'Foodie'],
+    cultural: ['Indian Heritage', 'Traditional Trades', 'Music & Festivals'],
+    area: 'Central',
+    amenities: ['MRT Accessible', 'Free Entry', 'Student Budget'],
+    heritageCategory: 'indian',
+    story: "🪔 Arjun says: 'Walk along Serangoon Road and you will smell fresh jasmine garlands and spices. It was once a place for cattle trading!'",
+    quizQuestion: "What was Serangoon Road originally used for?",
+    quizOptions: ["Spice farming", "Rubber factories", "Cattle trading"],
+    quizAnswer: "Cattle trading"
+  },
+  { 
+    id: 'Gardens',     
+    x: 220, y: 215, 
+    emoji: '🌳', 
+    label: 'Gardens by the Bay (滨海湾花园)', 
+    color: '#38b06c', 
+    defaultLocked: false, 
+    cost: 0,  
+    desc: 'Walk on high aerial bridges surrounded by towering vertical plant conservatories and nature biodiversity.',
+    feelings: ['Nature', 'Chill', 'Family Friendly'],
+    cultural: ['Nature & Biodiversity'],
+    area: 'South',
+    amenities: ['Wheelchair Accessible', 'Free Entry', 'Nearby Me'],
+    heritageCategory: 'nature',
+    story: "🌳 Aisyah says: 'These giant Supertrees aren\'t just pretty—they harvest solar energy, collect rainwater, and act as air venting ducts for the conservatories!'",
+    quizQuestion: "What do the Supertrees collect?",
+    quizOptions: ["Solar energy & rainwater", "Saltwater for conversion", "Soil nutrients from the air"],
+    quizAnswer: "Solar energy & rainwater"
+  },
+  { 
+    id: 'Botanic Gardens',     
+    x: 90, y: 150, 
+    emoji: '🌺', 
+    label: 'Botanic Gardens (新加坡植物园)', 
+    color: '#38b06c', 
+    defaultLocked: false, 
+    cost: 0,  
+    desc: 'UNESCO World Heritage site featuring lush tropical greenery, historical heritage trees, and a stunning National Orchid Garden.',
+    feelings: ['Nature', 'Chill', 'Date Ideas'],
+    cultural: ['Nature & Biodiversity', 'Colonial Singapore'],
+    area: 'Central',
+    amenities: ['MRT Accessible', 'Wheelchair Accessible', 'Free Entry'],
+    heritageCategory: 'nature',
+    story: "🌺 Claire says: 'Founded in 1859, this garden played a major role in the rubber boom of Southeast Asia in the early 20th century!'",
+    quizQuestion: "What crop did the Botanic Gardens help pioneer in Southeast Asia?",
+    quizOptions: ["Spices", "Rubber", "Rice"],
+    quizAnswer: "Rubber"
+  },
+  { 
+    id: 'Fort Canning',     
+    x: 145, y: 175, 
+    emoji: '🏛', 
+    label: 'Fort Canning (福康宁公园)', 
+    color: '#5b8de0', 
+    defaultLocked: true,  
+    cost: 10, 
+    desc: 'A historic hilltop park with remnants of Singapore\'s ancient rulers, colonial forts, and a beautiful spiral staircase gate.',
+    feelings: ['Nature', 'Curious', 'Date Ideas'],
+    cultural: ['Colonial Singapore', 'Performing Arts'],
+    area: 'Central',
+    amenities: ['Free Entry', 'Within 30 Minutes'],
+    heritageCategory: 'colonial',
+    story: "🏛 Claire says: 'This hill was known as \"Forbidden Hill\" (Bukit Larangan) because Malay kings were believed to be buried here!'",
+    quizQuestion: "What was Fort Canning Hill originally called?",
+    quizOptions: ["Bukit Larangan (Forbidden Hill)", "Raffles Mount", "Nutmeg Hill"],
+    quizAnswer: "Bukit Larangan (Forbidden Hill)"
+  },
+  { 
+    id: 'Police Station',     
+    x: 155, y: 185, 
+    emoji: '🎨', 
+    label: 'Old Hill Street Police Station (旧禧街警察局)', 
+    color: '#5b8de0', 
+    defaultLocked: true,  
+    cost: 15, 
+    desc: 'A historic building famous for its 927 rainbow-colored window shutters, serving as a landmark next to the Singapore River.',
+    feelings: ['Aesthetic', 'Creative'],
+    cultural: ['Colonial Singapore', 'Local Art Scene'],
+    area: 'Central',
+    amenities: ['Free Entry', 'MRT Accessible', 'Nearby Me'],
+    heritageCategory: 'colonial',
+    story: "🎨 Claire says: 'When it opened in 1934, it was the largest government building in Singapore and a state-of-the-art police station!'",
+    quizQuestion: "How many colored window shutters does the building have?",
+    quizOptions: ["500", "927", "1200"],
+    quizAnswer: "927"
+  },
+  { 
+    id: 'National Gallery',     
+    x: 170, y: 205, 
+    emoji: '🏛', 
+    label: 'National Gallery (国家美术馆)', 
+    color: '#5b8de0', 
+    defaultLocked: true,  
+    cost: 25, 
+    desc: 'A world-class visual arts museum housed in the former City Hall and Supreme Court, showcasing regional art.',
+    feelings: ['Creative', 'Aesthetic', 'Date Ideas'],
+    cultural: ['Local Art Scene', 'Performing Arts', 'Colonial Singapore'],
+    area: 'Central',
+    amenities: ['MRT Accessible', 'Wheelchair Accessible', 'Within 30 Minutes'],
+    heritageCategory: 'colonial',
+    story: "🎨 Nya says: 'This gallery holds the largest public collection of Singapore and Southeast Asian modern art in the world!'",
+    quizQuestion: "Which two historical buildings house the National Gallery?",
+    quizOptions: ["City Hall & Supreme Court", "Post Office & Police Station", "Parliament House & Victoria Hall"],
+    quizAnswer: "City Hall & Supreme Court"
+  },
+  { 
+    id: 'Chijmes',     
+    x: 165, y: 175, 
+    emoji: '⛪', 
+    label: 'Chijmes (赞美广场)', 
+    color: '#5b8de0', 
+    defaultLocked: true,  
+    cost: 20, 
+    desc: 'A former convent school restored as a gothic-style lifestyle, dining, and wedding enclave.',
+    feelings: ['Aesthetic', 'Chill', 'Date Ideas'],
+    cultural: ['Colonial Singapore', 'Performing Arts'],
+    area: 'Central',
+    amenities: ['MRT Accessible', 'Wheelchair Accessible', 'Free Entry'],
+    heritageCategory: 'colonial',
+    story: "⛪ Nya says: 'The gothic-style chapel here has beautiful stained-glass windows imported from Belgium in the 1890s!'",
+    quizQuestion: "What country were the stained-glass windows imported from?",
+    quizOptions: ["France", "Belgium", "England"],
+    quizAnswer: "Belgium"
+  },
+  { 
+    id: 'Joo Chiat',     
+    x: 270, y: 180, 
+    emoji: '🏘', 
+    label: 'Joo Chiat Road (如切路)', 
+    color: '#bd3d97', 
+    defaultLocked: true,  
+    cost: 20, 
+    desc: 'Famous for its colorful Peranakan heritage shophouses, traditional nonya beadwork, and delicious local food.',
+    feelings: ['Aesthetic', 'Foodie', 'Curious'],
+    cultural: ['Peranakan / Nyonya', 'Community Stories', 'Traditional Trades'],
+    area: 'East',
+    amenities: ['Student Budget', 'Within 30 Minutes'],
+    heritageCategory: 'peranakan',
+    story: "🏘 Nya says: 'Joo Chiat is named after Chew Joo Chiat, a wealthy landowner who gave his land for public roads. It\'s Singapore\'s first Heritage Town!'",
+    quizQuestion: "What is unique about Joo Chiat's status?",
+    quizOptions: ["It is the tallest hill", "It is Singapore's first Heritage Town", "It was once an empty desert"],
+    quizAnswer: "It is Singapore's first Heritage Town"
+  },
+  { 
+    id: 'East Coast',     
+    x: 290, y: 220, 
+    emoji: '🌊', 
+    label: 'East Coast Park (东海岸公园)', 
+    color: '#38b06c', 
+    defaultLocked: true,  
+    cost: 15, 
+    desc: 'A popular scenic coastal park offering sandy beaches, cycling paths, water sports, and seaside dining.',
+    feelings: ['Chill', 'Fun', 'Family Friendly'],
+    cultural: ['Nature & Biodiversity', 'Community Stories'],
+    area: 'East',
+    amenities: ['Free Entry', 'Wheelchair Accessible'],
+    heritageCategory: 'nature',
+    story: "🌊 Claire says: 'Built entirely on reclaimed land, it\'s now a hub for weekend picnics, windsurfing, and famous Singapore chili crab!'",
+    quizQuestion: "How was East Coast Park's land created?",
+    quizOptions: ["Volcanic eruption", "Land reclamation", "River silt build-up"],
+    quizAnswer: "Land reclamation"
+  },
+  { 
+    id: 'Sentosa',     
+    x: 135, y: 275, 
+    emoji: '🏝', 
+    label: 'Sentosa (圣淘沙)', 
+    color: '#073f72', 
+    defaultLocked: true,  
+    cost: 30, 
+    desc: 'A popular island resort with beaches, theme parks, historic Fort Siloso, and panoramic cable car views.',
+    feelings: ['Fun', 'Exciting', 'Date Ideas'],
+    cultural: ['Maritime Singapore', 'Community Stories'],
+    area: 'South',
+    amenities: ['Wheelchair Accessible', 'Within 30 Minutes'],
+    heritageCategory: 'colonial',
+    story: "🏝 Mei says: 'Before it was renamed Sentosa (meaning peace and tranquility), it was called Pulau Blakang Mati, which literally means \"island of death behind\"!'",
+    quizQuestion: "What did the island's old name, Pulau Blakang Mati, mean?",
+    quizOptions: ["Island of peace", "Island of death behind", "Golden island"],
+    quizAnswer: "Island of death behind"
+  },
+  { 
+    id: 'MacRitchie',     
+    x: 150, y: 110, 
+    emoji: '🌳', 
+    label: 'MacRitchie Reservoir (麦里芝水库)', 
+    color: '#38b06c', 
+    defaultLocked: true,  
+    cost: 10, 
+    desc: 'Singapore\'s oldest reservoir, featuring a famous TreeTop Walk suspension bridge and pristine rainforest trails.',
+    feelings: ['Nature', 'Chill', 'Curious'],
+    cultural: ['Nature & Biodiversity'],
+    area: 'Central',
+    amenities: ['Free Entry'],
+    heritageCategory: 'nature',
+    story: "🌳 Aisyah says: 'Completed in 1868, MacRitchie is named after municipal engineer James MacRitchie, who expanded the reservoir.'",
+    quizQuestion: "What type of forest is found around MacRitchie?",
+    quizOptions: ["Pine forest", "Tropical rainforest", "Mangrove swamp"],
+    quizAnswer: "Tropical rainforest"
+  },
+  { 
+    id: 'Clarke Quay',     
+    x: 140, y: 190, 
+    emoji: '🚢', 
+    label: 'Clarke Quay (克拉码头)', 
+    color: '#073f72', 
+    defaultLocked: true,  
+    cost: 20, 
+    desc: 'A historic riverside quay famous for its vibrant nightlife, dining, and traditional wooden cargo boat cruises.',
+    feelings: ['Exciting', 'Fun', 'Date Ideas'],
+    cultural: ['Maritime Singapore', 'Music & Festivals'],
+    area: 'Central',
+    amenities: ['MRT Accessible', 'Nearby Me'],
+    heritageCategory: 'colonial',
+    story: "🚢 Aisyah says: 'Named after Sir Andrew Clarke, Singapore\'s second Governor, it was once a hub for loading goods from cargo boats!'",
+    quizQuestion: "Who was Clarke Quay named after?",
+    quizOptions: ["A cargo merchant", "Singapore's second Governor", "A local pilot"],
+    quizAnswer: "Singapore's second Governor"
+  },
+  { 
+    id: 'Orchard',     
+    x: 103, y: 133, 
+    emoji: '🛍', 
+    label: 'Orchard Road (乌节路)',   
+    color: '#5b8de0', 
+    defaultLocked: true,  
+    cost: 40, 
+    desc: 'Singapore\'s world-renowned retail belt featuring endless shopping malls, street performers, and heritage trees.',
+    feelings: ['Fun', 'Foodie'],
+    cultural: ['Colonial Singapore', 'Community Stories'],
+    area: 'Central',
+    amenities: ['MRT Accessible', 'Wheelchair Accessible', 'Free Entry'],
+    heritageCategory: 'colonial',
+    story: "🛍 Mei says: 'Orchard Road was named after the nutmeg plantations and fruit orchards that lined it in the 1830s!'",
+    quizQuestion: "What plantations originally lined Orchard Road in the 1830s?",
+    quizOptions: ["Nutmeg & fruit orchards", "Rubber & sugar plantations", "Tea & coffee farms"],
+    quizAnswer: "Nutmeg & fruit orchards"
+  }
+];
+
+const TIER_COLOR = { Common:'#9a9ab0', Rare:'#5b8de0', Epic:'#bd3d97' };
+
+/* ── Feeling & Cultural Filters list ─────────────────────────────── */
+const FEELINGS = ['🌸 Chill', '🎉 Fun', '🔥 Exciting', '🎨 Creative', '🍜 Foodie', '📸 Aesthetic', '🌿 Nature', '🧠 Curious', '❤️ Date Ideas', '👨\u200d👩\u200d👧 Family Friendly'];
+const CULTURES = ['🧧 Chinese Heritage', '🕌 Malay Heritage', '🪔 Indian Heritage', '🌺 Peranakan / Nyonya', '🇪🇺 Eurasian Heritage', '🎭 Performing Arts', '🏛 Colonial Singapore', '⚓ Maritime Singapore', '🎨 Local Art Scene', '🍜 Hawker Culture', '🌳 Nature & Biodiversity', '🏘 Community Stories', '🎶 Music & Festivals', '🛍 Traditional Trades'];
+const AREAS = ['North', 'South', 'East', 'West', 'Central'];
+const AMENITIES = ['Nearby Me', 'Within 30 Minutes', 'MRT Accessible', 'Wheelchair Accessible', 'Free Entry', 'Student Budget'];
+
+/* ── Chinese Heritage Trail sub-stops ────────────────────────────── */
+const CHINESE_TRAIL_STOPS = [
+  { id: 'ct_1', label: 'Chinatown Heritage Centre (牛车水原貌馆)' },
+  { id: 'ct_2', label: 'Buddha Tooth Relic Temple (佛牙寺龙华院)' },
+  { id: 'ct_3', label: 'Kreta Ayer Stage (牛车水戏曲舞台)' },
+  { id: 'ct_4', label: 'Maxwell Food Centre (麦士威熟食中心)' },
+];
+
+/* ── Equirectangular Globe Map String (72 cols × 36 rows) ───────── */
+const MAP_ROWS = [
+  '........................................................................',
+  '...........................###.........................................',
+  '........#################.#######...........###############............',
+  '....#####################.######......#############################....',
+  '...######################.######....#################################..',
+  '..######################...#####...##################################..',
+  '...#######################..###...##################################...',
+  '...#######################........##################################...',
+  '....#####################........####################################..',
+  '.....#####################......###################################.##.',
+  '.....#######################....####################################..##',
+  '......####################......####################################.##.',
+  '........##################.....###################################.##...',
+  '.............#############....####################################......',
+  '..................########....###################.#####.########........',
+  '...................######.....###################.#####.#######.........',
+  '......................######....#################..###.########.........',
+  '......................#########..###############.......###########......',
+  '......................##########.##############........###########......',
+  '......................########...##############.........###########.....',
+  '......................#########..##############.........###########.....',
+  '.......................#########.############..##........###########....',
+  '.......................########..###########...##..........########.....',
+  '.......................########..###########....##..........########.....',
+  '........................######...########..................#######.....',
+  '.........................#####...######....................######......',
+  '..........................###..............................####...##...',
+  '..........................##.......................................##..',
+  '..........................##...........................................',
+  '........................................................................',
+  '...........................############################################',
+  '########################################################################',
+  '########################################################################',
+  '########################################################################',
+  '########################################################################',
+  '########################################################################',
+];
+
+/* ── Game Loading Tips ───────────────────────────────────────────── */
+const TIPS = [
+  "<b>拼岛玩家</b> means \"piece together the island players\" — collect real stamps.",
+  "The <b>Merlion</b> was sculpted in 1972. Half lion, half fish, all spitter.",
+  "<b>Chope a seat</b> with a tissue packet — honored island-wide since the 80s.",
+  "<b>Hawker centres</b> are UNESCO heritage. Try kaya toast at sunrise (+5 stamina).",
+  "The <b>Singapore Sling</b> was poured first at Raffles Hotel, 1915.",
+  "Singapore has <b>64+ islands</b>. Sentosa is the easy one. Pulau Ubin is the prize.",
+  "<b>Vanda Miss Joaquim</b> — the national orchid. Plant 3 to unlock the Botanic Gardens.",
+  "Catch the <b>Supertree light show</b> at 19:45 and 20:45 daily.",
+  "<b>Bukit Timah</b> peaks at 164m — the island’s highest natural point.",
+  "The <b>MRT</b> covers 230km across 6 lines. Pro tip: tap-in with the back of your phone.",
+  "<b>Chili crab</b> at Newton Circus. Bring tissues. Bring more tissues.",
+  "The <b>lantern at Chinatown</b> means the festival is near. Stock up on pineapple tarts.",
+  "<b>Marina Bay Sands</b> — three towers, one sky pool, infinite skyline points.",
+  "<b>Gardens by the Bay</b> sits on 101 hectares of reclaimed land.",
+  "<b>Kopi-O kosong</b> = black coffee, no sugar. Order like a local.",
+];
+
+/* ── StatusBar Component ─────────────────────────────────────────── */
+function StatusBar({ dark, coins, passportScore }) {
+  const fg = dark ? '#ccc' : BLU;
+  return (
+    <div style={{ height:44, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 20px 0', flexShrink:0, zIndex:100 }}>
+      <span style={{ fontFamily:FSN, fontWeight:800, fontSize:14, color:fg }}>9:41</span>
+      
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:4, background:dark?'rgba(255,255,255,.07)':'#fff', borderRadius:20, padding:'2px 8px', border:`1px solid ${dark?'rgba(255,255,255,.10)':GRY}`, height:22 }}>
+          <span style={{ fontSize:11 }}>🪙</span>
+          <span style={{ fontFamily:FPX, fontSize:6.5, color:PIK }} id="statusBarCoins">{coins}</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:4, background:dark?'rgba(255,255,255,.07)':'#fff', borderRadius:20, padding:'2px 8px', border:`1px solid ${dark?'rgba(255,255,255,.10)':GRY}`, height:22 }}>
+          <span style={{ fontFamily:FPX, fontSize:5.5, color:BLU }}>Passport: {passportScore}%</span>
+        </div>
+      </div>
+
+      <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill={fg}>
+          <rect x="0"  y="5" width="3" height="7" rx="1"/>
+          <rect x="4.5" y="3" width="3" height="9" rx="1"/>
+          <rect x="9"  y="1" width="3" height="11" rx="1"/>
+          <rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/>
+        </svg>
+        <svg width="26" height="12" viewBox="0 0 26 12" fill="none">
+          <rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke={fg} strokeWidth="1"/>
+          <rect x="2" y="2" width="16" height="8" rx="2" fill={fg}/>
+          <path d="M24 4.5V7.5C24.8 7.2 25.5 6.4 25.5 6C25.5 5.6 24.8 4.8 24 4.5Z" fill={fg} opacity=".6"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/* ── Onboarding / Character Card Component ───────────────────────── */
+function CharacterCard({ char, dark, onSelect, isUnlocked = true }) {
+  return (
+    <div style={{
+      background: dark ? 'rgba(255,255,255,.05)' : char.bg,
+      borderRadius:18, border:`2px solid ${char.accent}38`,
+      padding:'12px 8px', display:'flex', flexDirection:'column', alignItems:'center',
+      gap:4, position:'relative',
+      boxShadow: dark ? 'none' : `0 5px 16px ${char.accent}18`,
+      filter: isUnlocked ? 'none' : 'grayscale(100%) opacity(0.65)'
+    }}>
+      <div style={{ position:'absolute', top:7, right:7, background:TIER_COLOR[char.tier], borderRadius:4, padding:'2px 5px', fontFamily:FPX, fontSize:5.5, color:'#fff', letterSpacing:.5 }}>{char.tier}</div>
+      <div style={{ width:60, height:60, background:`${char.accent}22`, borderRadius:14, border:`3px solid ${char.accent}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:27, boxShadow:`3px 3px 0 ${char.accent}50`, marginTop:8 }}>{char.emoji}</div>
+      <div style={{ fontFamily:FPX, fontSize:7.5, color:dark?'#eee':BLU, letterSpacing:.3, marginTop:2, textAlign: 'center' }}>{char.name}</div>
+      <div style={{ fontFamily:FSN, fontSize:10, fontWeight:700, color:char.accent }}>{char.heritage}</div>
+      <div style={{ fontFamily:FSN, fontSize:9, color:dark?'#7060a0':'#9a8aaa', textAlign:'center', lineHeight:1.35, minHeight:24 }}>{char.tagline}</div>
+      
+      {isUnlocked ? (
+        <button 
+          onClick={() => onSelect(char)}
+          style={{ marginTop:8, background:char.accent, color:'#fff', border:'none', borderRadius:8, padding:'6px 14px', fontFamily:FPX, fontSize:6.5, letterSpacing:.3, boxShadow:`0 3px 0 ${char.accent}80`, cursor:'pointer' }}>
+          Select!
+        </button>
+      ) : (
+        <div style={{ marginTop: 8, fontFamily: FPX, fontSize: 5.5, color: '#e85d75', padding: '6px' }}>🔒 Locked</div>
+      )}
+    </div>
+  );
+}
+
+/* ── CharacterSelectScreen ───────────────────────────────────────── */
+function CharacterSelectScreen({ dark, onSelectCharacter }) {
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', paddingBottom: 20 }}>
+      <div style={{ padding:'12px 22px 6px', flexShrink:0 }}>
+        <div style={{ fontFamily:FPX, fontSize:8, color:PIK, letterSpacing:2, marginBottom:8 }}>✦ 探岛玩家 ✦</div>
+        <div style={{ fontFamily:FPX, fontSize:12, color:dark?'#f0e8ff':BLU, lineHeight:1.75, marginBottom:5 }}>Select your<br/>阅伴 (Yueban)</div>
+        <div style={{ fontFamily:FSN, fontSize:12, color:dark?'#7060a0':'#8878a8', lineHeight:1.5 }}>Choose a companion to accompany you on your Singapore cultural passport journey. This companion guides you through spot stories.</div>
+      </div>
+
+      <div style={{ display:'flex', gap:6, padding:'8px 22px', flexShrink:0 }}>
+        {[0,1,2].map(i=>(
+          <div key={i} style={{ height:6, width:i===0?22:8, borderRadius:3, background:i===0?PIK:dark?'rgba(255,255,255,.15)':GRY }}/>
+        ))}
+      </div>
+
+      <div className="scrollable" style={{ flex:1, padding:'10px 13px', display:'flex', flexDirection:'column', gap:10 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:9 }}>
+          {CHARS.slice(0,4).map(c=>(
+            <CharacterCard key={c.id} char={c} dark={dark} onSelect={onSelectCharacter} isUnlocked={true} />
+          ))}
+        </div>
+        <div style={{ display:'flex', justifyContent:'center', marginTop:2, paddingBottom: 20 }}>
+          <div style={{ width:'calc(50% - 5px)' }}>
+            <CharacterCard char={CHARS[4]} dark={dark} onSelect={onSelectCharacter} isUnlocked={true} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Map Screen View (狮城茶迹) ────────────────────────────────── */
+function ExploreMapTab({ 
+  dark, 
+  coins, 
+  unlockedPins, 
+  visitedSpots, 
+  selectedCharacter, 
+  onPinClick, 
+  activePin, 
+  onCheckIn, 
+  onUnlockDistrict,
+  selectedFeeling,
+  setSelectedFeeling,
+  selectedHeritage,
+  setSelectedHeritage,
+  selectedArea,
+  setSelectedArea,
+  selectedAmenity,
+  setSelectedAmenity,
+  chineseTrailCheckins,
+  onTrailCheckin,
+  hasCompletedTrail,
+  activeSubTab,
+  setActiveSubTab,
+  showToast,
+  setCoins,
+  quizAnswers,
+  setQuizAnswers
+}) {
+  const sheetBg = dark ? '#160b28' : '#fff';
+  const ink = dark ? '#f0e8ff' : BLU;
+  const muted = dark ? '#7060a0' : '#8878a8';
+  
+  const [filterCat, setFilterCat] = React.useState('feelings'); // feelings, culture, area, amenities
+  const [sheetTab, setSheetTab] = React.useState('details'); // details, story
+  const [quizState, setQuizState] = React.useState({ answered: false, correct: false });
+
+  React.useEffect(() => {
+    if (activePin) {
+      const isAlreadyAnswered = quizAnswers && quizAnswers.includes(activePin.id);
+      setQuizState({ answered: isAlreadyAnswered, correct: isAlreadyAnswered });
+      setSheetTab('details'); // Reset bottom tab
+    }
+  }, [activePin, quizAnswers]);
+
+  // Real-time map filtering highlights
+  const isPinHighlighted = (pin) => {
+    if (!selectedFeeling && !selectedHeritage && !selectedArea && !selectedAmenity) return true;
+    
+    let matchFeeling = true;
+    if (selectedFeeling) {
+      const cleanFeeling = selectedFeeling.replace(/[^a-zA-Z\s]/g, '').trim();
+      matchFeeling = pin.feelings.some(f => f.toLowerCase().includes(cleanFeeling.toLowerCase()));
+    }
+    
+    let matchHeritage = true;
+    if (selectedHeritage) {
+      const cleanHeritage = selectedHeritage.replace(/[^a-zA-Z\s\/]/g, '').trim();
+      matchHeritage = pin.cultural.some(c => c.toLowerCase().includes(cleanHeritage.toLowerCase()));
+    }
+
+    let matchArea = true;
+    if (selectedArea) {
+      matchArea = pin.area === selectedArea;
+    }
+
+    let matchAmenity = true;
+    if (selectedAmenity) {
+      matchAmenity = pin.amenities.includes(selectedAmenity);
+    }
+    
+    return matchFeeling && matchHeritage && matchArea && matchAmenity;
+  };
+
+  const handleQuizSubmit = (option) => {
+    if (quizState.answered) return;
+    const isCorrect = option === activePin.quizAnswer;
+    if (isCorrect) {
+      const nextAnswers = [...quizAnswers, activePin.id];
+      setQuizAnswers(nextAnswers);
+      DB.set('quizAnswers', nextAnswers);
+      setCoins(coins + 5);
+      showToast('🎉', 'CORRECT ANSWER', 'Pop quiz solved! Earned 🪙5 Coins!');
+      setQuizState({ answered: true, correct: true });
+    } else {
+      showToast('❌', 'INCORRECT', 'That is incorrect! Read the story again and retry.');
+    }
+  };
+
+  const trailStopsDone = chineseTrailCheckins.length;
+  const trailPercentage = Math.round((trailStopsDone / CHINESE_TRAIL_STOPS.length) * 100);
+
+  // Compute number of active filters
+  const hasActiveFilters = selectedFeeling || selectedHeritage || selectedArea || selectedAmenity;
+  const clearAllFilters = () => {
+    setSelectedFeeling(null);
+    setSelectedHeritage(null);
+    setSelectedArea(null);
+    setSelectedAmenity(null);
+  };
+
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', background: dark ? '#0e081c' : '#f5f0ff', overflow:'hidden' }}>
+      
+      {/* Search & On-screen filters header */}
+      <div style={{ padding: '8px 0 0', background: dark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.4)', flexShrink:0 }}>
+        {/* Toggle subtabs: Map View or Heritage Trails */}
+        <div style={{ display: 'flex', padding: '0 14px 6px', gap: 10 }}>
+          <button 
+            onClick={() => setActiveSubTab('map')}
+            style={{
+              flex: 1, padding: '6px', fontFamily: FPX, fontSize: '7px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+              background: activeSubTab === 'map' ? BLU : dark ? 'rgba(255,255,255,0.06)' : '#fff',
+              color: activeSubTab === 'map' ? '#fff' : dark ? '#8878a8' : BLU,
+              boxShadow: activeSubTab === 'map' ? `0 2px 4px ${BLU}aa` : 'none', transition: 'all 0.2s'
+            }}
+          >
+            🗺 Map (狮城茶迹)
+          </button>
+          <button 
+            onClick={() => setActiveSubTab('trails')}
+            style={{
+              flex: 1, padding: '6px', fontFamily: FPX, fontSize: '7px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+              background: activeSubTab === 'trails' ? BLU : dark ? 'rgba(255,255,255,0.06)' : '#fff',
+              color: activeSubTab === 'trails' ? '#fff' : dark ? '#8878a8' : BLU,
+              boxShadow: activeSubTab === 'trails' ? `0 2px 4px ${BLU}aa` : 'none', transition: 'all 0.2s'
+            }}
+          >
+            🏮 Trails (主题线路)
+          </button>
+        </div>
+
+        {activeSubTab === 'map' && (
+          <div style={{ borderTop: `1px solid ${dark?'rgba(255,255,255,.05)':'rgba(0,0,0,.04)'}` }}>
+            {/* Filter Category Selectors */}
+            <div style={{ display: 'flex', gap: 4, padding: '6px 14px 2px', overflowX: 'auto', scrollbarWidth:'none' }}>
+              <button 
+                onClick={() => setFilterCat('feelings')}
+                style={{
+                  padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer',
+                  background: filterCat === 'feelings' ? PIK : 'transparent',
+                  color: filterCat === 'feelings' ? '#fff' : dark ? '#a898c0' : BLU
+                }}
+              >🌸 Feelings</button>
+              <button 
+                onClick={() => setFilterCat('culture')}
+                style={{
+                  padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer',
+                  background: filterCat === 'culture' ? PIK : 'transparent',
+                  color: filterCat === 'culture' ? '#fff' : dark ? '#a898c0' : BLU
+                }}
+              >🏛 Culture</button>
+              <button 
+                onClick={() => setFilterCat('area')}
+                style={{
+                  padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer',
+                  background: filterCat === 'area' ? PIK : 'transparent',
+                  color: filterCat === 'area' ? '#fff' : dark ? '#a898c0' : BLU
+                }}
+              >🗺 Area</button>
+              <button 
+                onClick={() => setFilterCat('amenities')}
+                style={{
+                  padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer',
+                  background: filterCat === 'amenities' ? PIK : 'transparent',
+                  color: filterCat === 'amenities' ? '#fff' : dark ? '#a898c0' : BLU
+                }}
+              >⚙ Quick</button>
+              {hasActiveFilters && (
+                <button 
+                  onClick={clearAllFilters}
+                  style={{
+                    padding: '2px 8px', borderRadius: '6px', border: `1px solid ${PIK}`, fontSize: '9px', fontWeight: 'bold', cursor: 'pointer',
+                    background: 'transparent', color: PIK, flexShrink:0
+                  }}
+                >Reset 🚫</button>
+              )}
+            </div>
+
+            {/* Filter Tags horizontal lists */}
+            <div className="filter-row" style={{ minHeight: 32 }}>
+              {filterCat === 'feelings' && (
+                <>
+                  <div className={`filter-tag feeling ${!selectedFeeling ? 'active' : ''}`} onClick={() => setSelectedFeeling(null)}>All Feelings</div>
+                  {FEELINGS.map(f => (
+                    <div key={f} className={`filter-tag feeling ${selectedFeeling === f ? 'active' : ''}`} onClick={() => setSelectedFeeling(selectedFeeling === f ? null : f)}>{f}</div>
+                  ))}
+                </>
+              )}
+              {filterCat === 'culture' && (
+                <>
+                  <div className={`filter-tag ${!selectedHeritage ? 'active' : ''}`} onClick={() => setSelectedHeritage(null)}>All Heritages</div>
+                  {CULTURES.map(c => (
+                    <div key={c} className={`filter-tag ${selectedHeritage === c ? 'active' : ''}`} onClick={() => setSelectedHeritage(selectedHeritage === c ? null : c)}>{c}</div>
+                  ))}
+                </>
+              )}
+              {filterCat === 'area' && (
+                <>
+                  <div className={`filter-tag ${!selectedArea ? 'active' : ''}`} onClick={() => setSelectedArea(null)}>All Areas</div>
+                  {AREAS.map(a => (
+                    <div key={a} className={`filter-tag ${selectedArea === a ? 'active' : ''}`} onClick={() => setSelectedArea(selectedArea === a ? null : a)}>{a}</div>
+                  ))}
+                </>
+              )}
+              {filterCat === 'amenities' && (
+                <>
+                  <div className={`filter-tag ${!selectedAmenity ? 'active' : ''}`} onClick={() => setSelectedAmenity(null)}>All Amenities</div>
+                  {AMENITIES.map(m => (
+                    <div key={m} className={`filter-tag ${selectedAmenity === m ? 'active' : ''}`} onClick={() => setSelectedAmenity(selectedAmenity === m ? null : m)}>{m}</div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {activeSubTab === 'map' ? (
+        <>
+          <div style={{ position:'relative', flexShrink:0, borderBottom:`1.5px solid ${dark?'rgba(255,255,255,.08)':'rgba(10,87,153,.1)'}` }}>
+            <svg viewBox="0 0 375 296" width="375" height="296" style={{ display:'block', background: dark ? '#10162e' : '#c2dcee' }}>
+              {[74,148,222].map(y=><line key={y} x1="0" y1={y} x2="375" y2={y} stroke="rgba(255,255,255,.1)" strokeWidth="1"/>)}
+              {[93,187,280].map(x=><line key={x} x1={x} y1="0" x2={x} y2="296" stroke="rgba(255,255,255,.1)" strokeWidth="1"/>)}
+              <text x="187" y="30" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,.3)" fontFamily={FSN} fontWeight="600" letterSpacing="3">JOHOR STRAIT</text>
+              <line x1="170" y1="94" x2="170" y2="48" stroke="rgba(255,255,255,0.4)" strokeWidth="5"/>
+              
+              {/* Main Island shape */}
+              <polygon points="28,190 45,133 82,104 134,93 193,90 250,95 308,123 342,153 336,190 296,240 218,262 157,258 96,244 48,228" fill={dark ? '#223c28' : '#cfe8b0'} stroke={dark ? '#132818' : '#aacf8c'} strokeWidth="2"/>
+              
+              {/* Sentosa */}
+              <polygon points="114,272 154,268 167,276 151,284 111,281" fill={dark ? '#223c28' : '#cfe8b0'} stroke={dark ? '#132818' : '#aacf8c'} strokeWidth="1.5"/>
+
+              {/* Pins layer */}
+              {DISTRICTS.map((p) => {
+                const isUnlocked = unlockedPins.includes(p.id);
+                const isVisited = visitedSpots.includes(p.id);
+                const isActive = activePin && activePin.id === p.id;
+                const matchesFilters = isPinHighlighted(p);
+                
+                return (
+                  <g 
+                    key={p.id} 
+                    transform={`translate(${p.x},${p.y})`} 
+                    style={{ 
+                      cursor: 'pointer', 
+                      transition: 'opacity 0.3s, transform 0.2s',
+                      opacity: matchesFilters ? 1 : 0.2
+                    }} 
+                    onClick={() => {
+                      if (!matchesFilters) {
+                        showToast('💡', 'FILTER MISMATCH', `${p.label} doesn't match active filters.`);
+                        return;
+                      }
+                      onPinClick(p);
+                    }}
+                  >
+                    {isUnlocked && !isVisited && matchesFilters && (
+                      <circle r="18" fill={p.color} opacity="0.35" className="animate-pulse-pixel" />
+                    )}
+                    
+                    <ellipse cx="0" cy="14" rx="4" ry="1.5" fill="rgba(0,0,0,0.2)"/>
+
+                    <circle 
+                      r={isActive ? "14" : "11"} 
+                      fill={isUnlocked ? p.color : "#6a6a8a"} 
+                      stroke={isActive ? "#fff" : "none"} 
+                      strokeWidth="2" 
+                    />
+                    
+                    {!isUnlocked ? (
+                      <text textAnchor="middle" dominantBaseline="central" fontSize="7" y="0">🔒</text>
+                    ) : (
+                      <text textAnchor="middle" dominantBaseline="central" fontSize={isActive ? "10" : "8"} y="-0.5">{p.emoji}</text>
+                    )}
+
+                    {isUnlocked && isVisited && (
+                      <g transform="translate(8, -8)">
+                        <circle r="4.5" fill="#38b06c" stroke="#fff" strokeWidth="1" />
+                        <text textAnchor="middle" dominantBaseline="central" fontSize="5.5" fill="#fff" y="-0.5" fontWeight="bold">✓</text>
+                      </g>
+                    )}
+                  </g>
+                );
+              })}
+
+              {/* Companion Active Marker moving dynamically */}
+              {selectedCharacter && (
+                <g transform={`translate(${activePin ? activePin.x : 183}, ${activePin ? activePin.y - 12 : 212})`}>
+                  <circle r="16" fill={PIK} opacity=".2"/>
+                  <circle r="10" fill={PIK} opacity=".4" className="animate-pulse-pixel" />
+                  <circle r="5"  fill={PIK}/>
+                  <circle r="2"  fill="#fff"/>
+                  <text y="-14" textAnchor="middle" fontSize="14">{selectedCharacter.emoji}</text>
+                </g>
+              )}
+            </svg>
+            
+            {/* Total districts progress chips */}
+            <div style={{ position:'absolute', bottom:10, right:13, background:BLU, borderRadius:10, padding:'6px 10px', display:'flex', gap:5, alignItems:'center', boxShadow:'0 4px 12px rgba(0,0,0,0.15)' }}>
+              <span style={{ fontSize:10 }}>📍</span>
+              <span style={{ fontFamily:FPX, fontSize:6.5, color:'#fff' }}>{unlockedPins.length}/16 Unlocked</span>
+            </div>
+          </div>
+
+          {/* Dynamic Bottom Sheet Detail view */}
+          <div style={{ flex:1, background:sheetBg, borderTopLeftRadius:22, borderTopRightRadius:22, padding:'10px 14px 0', boxShadow:'0 -6px 28px rgba(0,0,0,.15)', overflow:'hidden', display:'flex', flexDirection:'column' }}>
+            <div style={{ width:34, height:4, background:dark?'rgba(255,255,255,.14)':GRY, borderRadius:2, margin:'0 auto 8px', flexShrink:0 }}/>
+            
+            <div className="scrollable" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              {activePin ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h4 style={{ fontFamily: FPX, fontSize: '8px', color: ink, display: 'inline-flex', alignItems: 'center', gap: 6, lineHeight:1.3 }}>
+                        <span style={{ fontSize: 14 }}>{activePin.emoji}</span> {activePin.label}
+                      </h4>
+                      <div style={{ fontSize: 10, color: muted, marginTop: 1 }}>{activePin.area} Zone · {activePin.heritageCategory.toUpperCase()}</div>
+                    </div>
+                    
+                    {unlockedPins.includes(activePin.id) ? (
+                      <span style={{ background: visitedSpots.includes(activePin.id) ? '#38b06c1a' : '#bd3d971a', color: visitedSpots.includes(activePin.id) ? '#38b06c' : '#bd3d97', border: `1px solid ${visitedSpots.includes(activePin.id) ? '#38b06c40' : '#bd3d9740'}`, fontSize: 8, fontWeight: 'bold', padding: '3px 8px', borderRadius: 20, flexShrink:0 }}>
+                        {visitedSpots.includes(activePin.id) ? '🏆 Checked-In' : '✦ Discovered'}
+                      </span>
+                    ) : (
+                      <span style={{ background: '#6a6a8a20', color: '#6a6a8a', border: '1px solid #6a6a8a40', fontSize: 8, fontWeight: 'bold', padding: '3px 8px', borderRadius: 20, flexShrink:0 }}>
+                        🔒 Locked
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Subtabs inside bottom details panel: details vs story */}
+                  {unlockedPins.includes(activePin.id) && (
+                    <div style={{ display: 'flex', borderBottom: `1px solid ${dark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)'}`, gap: 12 }}>
+                      <button 
+                        onClick={() => setSheetTab('details')}
+                        style={{
+                          padding: '4px 0 6px', border: 'none', background: 'transparent', fontFamily: FPX, fontSize: '7px', cursor: 'pointer',
+                          color: sheetTab === 'details' ? PIK : muted,
+                          borderBottom: sheetTab === 'details' ? `2px solid ${PIK}` : 'none'
+                        }}
+                      >🔍 Details</button>
+                      <button 
+                        onClick={() => setSheetTab('story')}
+                        style={{
+                          padding: '4px 0 6px', border: 'none', background: 'transparent', fontFamily: FPX, fontSize: '7px', cursor: 'pointer',
+                          color: sheetTab === 'story' ? PIK : muted,
+                          borderBottom: sheetTab === 'story' ? `2px solid ${PIK}` : 'none'
+                        }}
+                      >🍵 茶言阅语 (Story)</button>
+                    </div>
+                  )}
+
+                  {sheetTab === 'details' ? (
+                    <>
+                      <p style={{ fontSize: 11, color: dark ? '#b2a5ca' : '#554868', lineHeight: 1.4 }}>
+                        {activePin.desc}
+                      </p>
+                      
+                      {/* Amenities / Chips display */}
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:4, marginTop: 2 }}>
+                        {activePin.amenities.map(a => (
+                          <span key={a} style={{ fontSize: 9, background: dark?'rgba(255,255,255,.05)':'rgba(10,87,153,.05)', padding: '2px 6px', borderRadius: 6, color: muted }}>{a}</span>
+                        ))}
+                      </div>
+
+                      <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column' }}>
+                        {unlockedPins.includes(activePin.id) ? (
+                          <button 
+                            onClick={(e) => onCheckIn(activePin, e)}
+                            style={{
+                              width: '100%', background: visitedSpots.includes(activePin.id) ? '#38b06c' : PIK, border: 'none', borderRadius: 12, padding: '10px', color: '#fff',
+                              fontFamily: FPX, fontSize: '8px', letterSpacing: '0.5px', cursor: 'pointer',
+                              boxShadow: `0 4px 0 ${visitedSpots.includes(activePin.id) ? '#287d4d' : '#8a236a'}`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 'bold'
+                            }}
+                          >
+                            <span>📍</span> {visitedSpots.includes(activePin.id) ? 'CHECK-IN AGAIN (+10 XP)' : 'GPS CHECK-IN (+50 Passport XP, 🪙15)'}
+                          </button>
+                        ) : (
+                          <div style={{ background: dark ? 'rgba(0,0,0,0.2)' : 'rgba(10,87,153,0.04)', borderRadius:12, padding: '10px', border: `1.5px dashed ${dark?'#33254e':'#c2dcee'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                            <div style={{ fontSize: 10, color: muted, fontWeight: 'bold' }}>Travel Budget Needed:</div>
+                            <button 
+                              onClick={() => onUnlockDistrict(activePin)}
+                              disabled={coins < activePin.cost}
+                              style={{
+                                width: '100%', background: coins >= activePin.cost ? BLU : '#535061', border: 'none', borderRadius: 10, padding: '8px', color: '#fff',
+                                fontFamily: FPX, fontSize: '8px', cursor: coins >= activePin.cost ? 'pointer' : 'not-allowed',
+                                opacity: coins >= activePin.cost ? 1 : 0.6, boxShadow: coins >= activePin.cost ? `0 3px 0 ${BLU}aa` : 'none',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                              }}
+                            >
+                              <span>🔓</span> Unlock with 🪙 {activePin.cost} Coins
+                            </button>
+                            {coins < activePin.cost && (
+                              <div style={{ fontSize: 8.5, color: '#d63864', fontWeight: 'bold', textAlign:'center' }}>⚠️ Earn more coins by visiting Chinatown or Kampong Glam!</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    /* Interactive dialogue story tab (茶言阅语) */
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{
+                        background: dark ? '#0d0a11' : '#fcfaff',
+                        border: `1.5px solid ${selectedCharacter.accent}60`,
+                        borderRadius: 14,
+                        padding: 10,
+                        position: 'relative',
+                        boxShadow: `0 4px 10px rgba(0,0,0,0.06)`,
+                        display: 'flex', gap: 10
+                      }}>
+                        <div style={{
+                          width: 38, height: 38, borderRadius: 10, background: selectedCharacter.accent + '22',
+                          border: `2px solid ${selectedCharacter.accent}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: 20, flexShrink:0
+                        }}>
+                          {selectedCharacter.emoji}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontFamily: FPX, fontSize: '6.5px', color: selectedCharacter.accent, marginBottom: 2 }}>{selectedCharacter.name}</div>
+                          <p style={{ fontSize: 11.5, color: dark ? '#eee' : '#111', lineHeight: 1.45, fontStyle: 'italic' }}>
+                            {activePin.story}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Interactive heritage quiz from Yueban */}
+                      <div className="quiz-container">
+                        <div style={{ display: 'flex', gap: 6, alignItems:'center' }}>
+                          <span style={{ fontSize: 13 }}>💡</span>
+                          <span style={{ fontFamily: FPX, fontSize: '6px', color: BLU }}>Yueban Heritage Quiz (+🪙5)</span>
+                        </div>
+                        <p style={{ fontSize: 11.5, fontWeight: '700', color: ink, marginTop: 5 }}>
+                          {activePin.quizQuestion}
+                        </p>
+                        {quizState.answered ? (
+                          <div style={{ color: '#38b06c', fontSize: 11, fontWeight: 'bold', marginTop: 8, display: 'flex', gap: 4, alignItems:'center' }}>
+                            <span>✓ Correct! You solved this quiz.</span>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {activePin.quizOptions.map((opt, idx) => (
+                              <button 
+                                key={idx} 
+                                className="quiz-option"
+                                onClick={() => handleQuizSubmit(opt)}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Default Map Info tips */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ background: dark?'rgba(189,61,151,.12)':'#fdf0fb', borderRadius:13, border:`1.5px solid ${PIK}28`, padding:'10px 12px', display:'flex', alignItems:'center', gap:10 }}>
+                    <span style={{ fontSize:22 }}>🗺️</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontFamily:FPX, fontSize:6.5, color:PIK, marginBottom:4 }}>狮城茶迹 Guide</div>
+                      <div style={{ fontSize:10.5, color:muted, fontWeight: 700 }}>Choose a Feeling, Heritage, or Area filter above to discover local heritage spots on the map.</div>
+                    </div>
+                  </div>
+                  <div style={{ padding: '4px 6px' }}>
+                    <h5 style={{ fontFamily: FPX, fontSize: 6.5, color: ink, marginBottom: 6 }}>💡 How to play</h5>
+                    <ul style={{ paddingLeft: 14, fontSize: 10, color: muted, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <li>Highlighted locations fit your current filter queries.</li>
+                      <li>Visit unlocked spots (🦁, 🧧) to level up your Cultural Passport.</li>
+                      <li>Answer Yueban quizzes in the <b>Story</b> tab to earn free coins!</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        /* HERITAGE TRAILS SUBTAB VIEW */
+        <div className="scrollable" style={{ flex:1, padding:'12px 14px', display:'flex', flexDirection:'column', gap:12 }}>
+          <div style={{
+            background: dark ? 'rgba(255,255,255,0.03)' : '#fff',
+            border: `1.5px solid ${hasCompletedTrail ? '#38b06c40' : PIK + '40'}`,
+            borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 10,
+            boxShadow: dark ? 'none' : '0 4px 16px rgba(10,87,153,0.04)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontFamily: FPX, fontSize: '7px', color: hasCompletedTrail ? '#38b06c' : PIK }}>
+                🧧 Chinese Heritage Trail (华裔探索线)
+              </span>
+              {hasCompletedTrail && (
+                <span style={{ background: '#38b06c1a', color: '#38b06c', fontSize: 6, fontFamily: FPX, padding: '2px 5px', borderRadius: 4 }}>COMPLETED</span>
+              )}
+            </div>
+            
+            <p style={{ fontSize: 10.5, color: muted, lineHeight: 1.45 }}>
+              Visit Chinatown Heritage Museum, Buddha Tooth Relic Temple, Kreta Ayer Stage, and Maxwell Food Centre to complete the museum partnership set.
+            </p>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: ink, marginBottom: 4, fontFamily: FPX }}>
+                <span>Trail Progress</span>
+                <span>{trailStopsDone}/4 Stops ({trailPercentage}%)</span>
+              </div>
+              <div className="pixel-progress-container" style={{ height: 10 }}>
+                <div 
+                  className="pixel-progress-fill" 
+                  style={{ 
+                    width: `${trailPercentage}%`,
+                    background: hasCompletedTrail ? '#38b06c' : PIK
+                  }} 
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {CHINESE_TRAIL_STOPS.map((stop) => {
+                const checked = chineseTrailCheckins.includes(stop.id);
+                return (
+                  <div 
+                    key={stop.id} 
+                    className="trail-check-item"
+                    onClick={() => onTrailCheckin(stop.id)}
+                  >
+                    <div className={`trail-check-box ${checked ? 'checked' : ''}`}>
+                      {checked ? '✓' : ''}
+                    </div>
+                    <span style={{ color: checked ? (dark ? '#61dfa1' : '#287d4d') : ink }}>
+                      {stop.label}
+                    </span>
+                    {!checked && (
+                      <span style={{ marginLeft: 'auto', fontSize: 7, fontFamily: FPX, color: PIK }}>+🪙5</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {hasCompletedTrail && (
+              <div style={{
+                background: dark ? 'rgba(97,223,161,0.06)' : 'rgba(56,176,108,0.05)',
+                border: '1.5px dashed #38b06c', borderRadius: 12, padding: 10, display: 'flex', flexDirection: 'column', gap: 5
+              }}>
+                <div style={{ fontFamily: FPX, fontSize: 7, color: '#38b06c' }}>🏆 Trail Reward Unlocked!</div>
+                <div style={{ fontSize: 10.5, color: ink }}>
+                  • <b>🏮 Limited Chinese Heritage Pin Set</b> added to 阅章 album.<br/>
+                  • Museum Discount Promo Code: <b style={{ fontFamily: FPX, fontSize: 7, color: PIK }}>ISLANDPLAYER20</b>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Collect / 阅章 Badge Album Screen ──────────────────────────── */
+function CollectBadgesScreen({ 
+  dark, 
+  unlockedPins, 
+  visitedSpots, 
+  hasCompletedTrail, 
+  coins, 
+  setCoins,
+  unlockedCharacters,
+  setUnlockedCharacters,
+  selectedCharacter,
+  setSelectedCharacter,
+  showToast,
+  orders,
+  setOrders
+}) {
+  const ink = dark ? '#f0e8ff' : BLU;
+  const muted = dark ? '#7060a0' : '#8878a8';
+  
+  const [subTab, setSubTab] = React.useState('badges'); // badges, gacha, merch
+  const [gachaState, setGachaState] = React.useState('idle'); // idle, shaking, revealed
+  const [gachaResult, setGachaResult] = React.useState(null);
+  const [matchingGroup, setMatchingGroup] = React.useState(null); // matching index
+
+  const handleGachaDraw = () => {
+    if (coins < 50) {
+      showToast('❌', 'INSUFFICIENT COINS', 'Drawing a blind box costs 50 Coins! Check in at locations to earn more.');
+      return;
+    }
+    setCoins(coins - 50);
+    setGachaState('shaking');
+    
+    setTimeout(() => {
+      // Pick a random character
+      const randomChar = CHARS[Math.floor(Math.random() * CHARS.length)];
+      const isAlreadyUnlocked = unlockedCharacters.includes(randomChar.id);
+      
+      let toastMsg = '';
+      if (isAlreadyUnlocked) {
+        setCoins(prev => prev + 15); // refund 15 coins for duplicate
+        toastMsg = `Duplicate character! Refunded +🪙15 Coins.`;
+      } else {
+        const nextChars = [...unlockedCharacters, randomChar.id];
+        setUnlockedCharacters(nextChars);
+        DB.set('unlockedCharacters', nextChars);
+        toastMsg = `Unlocked companion: ${randomChar.name}!`;
+      }
+      
+      setGachaResult({ char: randomChar, duplicate: isAlreadyUnlocked });
+      setGachaState('revealed');
+      showToast(randomChar.emoji, isAlreadyUnlocked ? 'GACHA DUPLICATE' : 'GACHA UNLOCKED', toastMsg);
+      window.dispatchEvent(new Event('local-db-updated'));
+    }, 1200);
+  };
+
+  const handleGroupBuy = (item, isGroup) => {
+    const cost = isGroup ? item.groupPrice : item.soloPrice;
+    if (coins < cost) {
+      showToast('❌', 'INSUFFICIENT COINS', `Redeeming this requires 🪙${cost} Coins!`);
+      return;
+    }
+
+    if (isGroup) {
+      setMatchingGroup(item.id);
+      setTimeout(() => {
+        setMatchingGroup(null);
+        setCoins(coins - cost);
+        const newOrder = {
+          id: 'order_' + Date.now(),
+          item: item.name,
+          emoji: item.emoji,
+          price: cost,
+          status: 'Completed (Group buy matched)',
+          date: new Date().toLocaleDateString()
+        };
+        const nextOrders = [...orders, newOrder];
+        setOrders(nextOrders);
+        DB.set('orders', nextOrders);
+        showToast('👥', 'GROUP BUY SUCCESS', `Virtual group buy matched! Ordered ${item.name} for 🪙${cost}!`);
+        window.dispatchEvent(new Event('local-db-updated'));
+      }, 2000);
+    } else {
+      setCoins(coins - cost);
+      const newOrder = {
+        id: 'order_' + Date.now(),
+        item: item.name,
+        emoji: item.emoji,
+        price: cost,
+        status: 'Ordered (Solo)',
+        date: new Date().toLocaleDateString()
+      };
+      const nextOrders = [...orders, newOrder];
+      setOrders(nextOrders);
+      DB.set('orders', nextOrders);
+      showToast('📦', 'ORDER COMPLETED', `Solo redemption successful! Ordered ${item.name} for 🪙${cost}!`);
+      window.dispatchEvent(new Event('local-db-updated'));
+    }
+  };
+
+  // Mock physical merchandise
+  const MERCH_ITEMS = [
+    { id: 'pin_chinatown', name: '📍 Chinatown Heritage Pin', emoji: '📍', soloPrice: 100, groupPrice: 30, desc: 'Collector enamel pin for Chinatown.' },
+    { id: 'pin_mosque', name: '📍 Sultan Mosque Enamel Pin', emoji: '🕌', soloPrice: 100, groupPrice: 30, desc: 'Gilded enamel pin for Kampong Glam.' },
+    { id: 'pin_india', name: '📍 Little India Enamel Pin', emoji: '🪔', soloPrice: 100, groupPrice: 30, desc: 'Vibrant enamel pin for Little India.' },
+    { id: 'keychain_yueban', name: '🔑 Yueban Companion Keychain Set', emoji: '🔑', soloPrice: 150, groupPrice: 40, desc: 'Keychain set of all 5 pixel Yueban buddies.' },
+    { id: 'stamp_sheet', name: '🖼️ Cultural Passport Stamp Sheet', emoji: '🖼️', soloPrice: 80, groupPrice: 25, desc: 'Real commemorative stamp grid sheet.' }
+  ];
+
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', background: dark ? '#0e081c' : '#f5f0ff', padding: '12px 14px 0', overflow:'hidden' }}>
+      
+      {/* Subtab selection headers */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexShrink: 0 }}>
+        <button 
+          onClick={() => { setSubTab('badges'); setGachaState('idle'); }}
+          style={{
+            flex: 1, padding: '6px', fontFamily: FPX, fontSize: '6.5px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+            background: subTab === 'badges' ? PIK : dark ? 'rgba(255,255,255,0.06)' : '#fff',
+            color: subTab === 'badges' ? '#fff' : dark ? '#8878a8' : BLU
+          }}
+        >
+          🏆 Badges (阅章)
+        </button>
+        <button 
+          onClick={() => { setSubTab('gacha'); setGachaState('idle'); }}
+          style={{
+            flex: 1, padding: '6px', fontFamily: FPX, fontSize: '6.5px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+            background: subTab === 'gacha' ? PIK : dark ? 'rgba(255,255,255,0.06)' : '#fff',
+            color: subTab === 'gacha' ? '#fff' : dark ? '#8878a8' : BLU
+          }}
+        >
+          📦 Blind Box (盲盒)
+        </button>
+        <button 
+          onClick={() => { setSubTab('merch'); setGachaState('idle'); }}
+          style={{
+            flex: 1, padding: '6px', fontFamily: FPX, fontSize: '6.5px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+            background: subTab === 'merch' ? PIK : dark ? 'rgba(255,255,255,0.06)' : '#fff',
+            color: subTab === 'merch' ? '#fff' : dark ? '#8878a8' : BLU
+          }}
+        >
+          👥 Shop (拼单)
+        </button>
+      </div>
+
+      {subTab === 'badges' && (
+        <>
+          <p style={{ fontSize: 11, color: muted, marginBottom: 10 }}>Collect heritage badges by visiting real locations.</p>
+          <div className="scrollable" style={{ flex: 1, paddingBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {DISTRICTS.map((d) => {
+                const isUnlocked = unlockedPins.includes(d.id);
+                const isVisited = visitedSpots.includes(d.id);
+                
+                return (
+                  <div key={d.id} style={{
+                    background: dark ? 'rgba(255,255,255,0.03)' : '#fff',
+                    border: `1.5px solid ${isVisited ? d.color + '40' : dark ? 'rgba(255,255,255,0.06)' : GRY}`,
+                    borderRadius: 12, padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    opacity: isUnlocked ? 1 : 0.45, filter: isUnlocked ? 'none' : 'grayscale(100%)',
+                    boxShadow: dark ? 'none' : '0 2px 8px rgba(10,87,153,0.03)'
+                  }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 10, background: isVisited ? d.color + '15' : 'rgba(0,0,0,0.05)',
+                      border: `2px solid ${isVisited ? d.color : '#6a6a8a'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18
+                    }}>
+                      {isUnlocked ? d.emoji : '🔒'}
+                    </div>
+
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontFamily: FPX, fontSize: '5.5px', color: dark ? '#eee' : BLU, lineHeight: 1.2 }}>{d.label.split(' ')[0]}</div>
+                      <div style={{ fontSize: 8.5, color: isVisited ? '#38b06c' : isUnlocked ? PIK : '#6a6a8a', fontWeight: 'bold', marginTop: 2 }}>
+                        {isVisited ? '🏆 Collected' : isUnlocked ? '✦ Active' : '🔒 Locked'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Chinese Heritage Trail pin set badge */}
+              <div style={{
+                background: dark ? 'rgba(255,255,255,0.03)' : '#fff',
+                border: `1.5px solid ${hasCompletedTrail ? '#38b06c' : 'rgba(255,255,255,0.06)'}`,
+                borderRadius: 12, padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                opacity: hasCompletedTrail ? 1 : 0.35, filter: hasCompletedTrail ? 'none' : 'grayscale(100%)',
+                boxShadow: dark ? 'none' : '0 2px 8px rgba(10,87,153,0.03)'
+              }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 10, background: hasCompletedTrail ? 'rgba(56,176,108,0.1)' : 'rgba(0,0,0,0.05)',
+                  border: `2px solid ${hasCompletedTrail ? '#38b06c' : '#6a6a8a'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18
+                }}>
+                  🏮
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: FPX, fontSize: '5.5px', color: dark ? '#eee' : BLU, lineHeight: 1.2 }}>Trail Pin Set</div>
+                  <div style={{ fontSize: 8.5, color: hasCompletedTrail ? '#38b06c' : '#6a6a8a', fontWeight: 'bold', marginTop: 2 }}>
+                    {hasCompletedTrail ? '🏆 Unlocked' : '🔒 Trail Reward'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {subTab === 'gacha' && (
+        <div className="scrollable" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 20 }}>
+          <div className="gacha-machine">
+            <h4 style={{ fontFamily: FPX, fontSize: '8px', color: '#fff' }}>Yueban Companion Gacha 📦</h4>
+            
+            <div className="gacha-screen">
+              {gachaState === 'idle' && (
+                <div style={{ textAlign: 'center', padding: 10 }}>
+                  <span style={{ fontSize: 48 }}>🤖</span>
+                  <div style={{ fontFamily: FPX, fontSize: '6px', color: PIK, marginTop: 8 }}>Capsule Machine Ready</div>
+                </div>
+              )}
+              {gachaState === 'shaking' && (
+                <div className="gacha-shaker">⚡📦⚡</div>
+              )}
+              {gachaState === 'revealed' && gachaResult && (
+                <div className="gacha-reveal" style={{ textAlign: 'center', display:'flex', flexDirection:'column', alignItems:'center', gap: 4 }}>
+                  <div style={{
+                    width: 50, height: 50, borderRadius: 12, background: `${gachaResult.char.accent}20`,
+                    border: `3.5px solid ${gachaResult.char.accent}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: 24
+                  }}>{gachaResult.char.emoji}</div>
+                  <div style={{ fontFamily: FPX, fontSize: '7.5px', color: '#fff' }}>{gachaResult.char.name}</div>
+                  <div style={{ fontSize: 9.5, color: gachaResult.duplicate ? '#ffd700' : '#38b06c', fontWeight: 'bold' }}>
+                    {gachaResult.duplicate ? 'Duplicate (+🪙15 Refunded)' : '✨ Newly Unlocked!'}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display:'flex', justifyContent:'space-between', width:'100%', alignItems:'center', marginTop: 5 }}>
+              <div style={{ fontSize: 9.5, color: '#a898c0' }}>
+                Cost: <b style={{ fontFamily:FPX, fontSize:7, color:PIK }}>50 Coins</b>
+              </div>
+              <button 
+                onClick={handleGachaDraw}
+                disabled={gachaState === 'shaking'}
+                style={{
+                  background: PIK, border: 'none', borderRadius: 10, padding: '8px 14px', color: '#fff',
+                  fontFamily: FPX, fontSize: '7.5px', cursor: gachaState === 'shaking' ? 'not-allowed' : 'pointer',
+                  boxShadow: `0 3px 0 #8a236a`
+                }}
+              >
+                Draw Box! 🪙
+              </button>
+            </div>
+          </div>
+
+          {/* Unlocked characters list */}
+          <div style={{ background: dark?'rgba(255,255,255,0.02)':'#fff', padding: 12, borderRadius: 14, border: '1px solid rgba(0,0,0,0.05)' }}>
+            <h5 style={{ fontFamily: FPX, fontSize: '6px', color: ink, marginBottom: 8 }}>My Companions Collection ({unlockedCharacters.length}/5)</h5>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              {CHARS.map(c => {
+                const isUnlocked = unlockedCharacters.includes(c.id);
+                const isActive = selectedCharacter && selectedCharacter.id === c.id;
+                return (
+                  <div 
+                    key={c.id}
+                    onClick={() => isUnlocked && setSelectedCharacter(c)}
+                    style={{
+                      padding: 6, borderRadius: 10, background: isUnlocked ? c.bg : 'rgba(0,0,0,0.04)',
+                      border: `1.5px solid ${isActive ? c.accent : 'transparent'}`,
+                      display: 'flex', alignItems: 'center', gap: 8, cursor: isUnlocked ? 'pointer' : 'default',
+                      opacity: isUnlocked ? 1 : 0.45
+                    }}
+                  >
+                    <span style={{ fontSize: 16 }}>{isUnlocked ? c.emoji : '🔒'}</span>
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 'bold', color: isUnlocked ? (dark ? '#eee' : BLU) : '#a898c0' }}>{c.name.split(' ')[0]}</div>
+                      <div style={{ fontSize: 8, color: isActive ? c.accent : '#a898c0' }}>{isActive ? 'Active ⚡' : isUnlocked ? 'Companion' : 'Locked'}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {subTab === 'merch' && (
+        <div className="scrollable" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 20 }}>
+          <div style={{ background: dark?'rgba(255,255,255,0.02)':'#fff', padding: 8, borderRadius: 12, border: '1px solid rgba(0,0,0,0.04)' }}>
+            <div style={{ display: 'flex', gap: 6, alignItems:'center' }}>
+              <span style={{ fontSize: 14 }}>👥</span>
+              <span style={{ fontFamily: FPX, fontSize: '5.5px', color: PIK }}>Pinduoduo Co-op Stamp Deals</span>
+            </div>
+            <p style={{ fontSize: 9.5, color: muted, marginTop: 4, lineHeight:1.3 }}>
+              Redeem exclusive physical enamel pins and merchandise. Complete group buys to save up to 70%!
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {MERCH_ITEMS.map(item => (
+              <div key={item.id} className="merch-card">
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div style={{
+                    width: 38, height: 38, background: 'rgba(0,0,0,0.05)', border: `1.5px solid ${PIK}`,
+                    borderRadius: 8, display: 'flex', alignItems:'center', justifyContent:'center', fontSize: 20
+                  }}>{item.emoji}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 10.5, fontWeight: '700', color: ink }}>{item.name}</div>
+                    <div style={{ fontSize: 9, color: muted }}>{item.desc}</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)'}`, paddingTop: 6 }}>
+                  <div>
+                    <span style={{ fontSize: 8.5, color: muted, textDecoration: 'line-through', marginRight: 6 }}>Solo: 🪙{item.soloPrice}</span>
+                    <span style={{ fontSize: 10.5, fontWeight: 'bold', color: PIK }}>Group: 🪙{item.groupPrice}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button 
+                      onClick={() => handleGroupBuy(item, false)}
+                      style={{
+                        padding: '4px 6px', background: '#535061', color: '#fff', border: 'none', borderRadius: 6,
+                        fontFamily: FPX, fontSize: '5.5px', cursor: 'pointer'
+                      }}
+                    >Solo 🪙{item.soloPrice}</button>
+                    <button 
+                      onClick={() => handleGroupBuy(item, true)}
+                      disabled={matchingGroup !== null}
+                      style={{
+                        padding: '4px 6px', background: BLU, color: '#fff', border: 'none', borderRadius: 6,
+                        fontFamily: FPX, fontSize: '5.5px', cursor: matchingGroup !== null ? 'not-allowed' : 'pointer',
+                        boxShadow: `0 2px 0 ${dark?'#073f72':'#052e52'}`
+                      }}
+                    >
+                      {matchingGroup === item.id ? 'Matching...' : 'Group Buy 👥'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Orders History */}
+          <div style={{ background: dark?'rgba(255,255,255,0.02)':'#fff', padding: 12, borderRadius: 14, border: '1px solid rgba(0,0,0,0.05)' }}>
+            <h5 style={{ fontFamily: FPX, fontSize: '6px', color: ink, marginBottom: 6 }}>My Orders History</h5>
+            {orders.length === 0 ? (
+              <div style={{ fontSize: 9.5, color: muted, textAlign: 'center', padding: 10 }}>No orders placed yet. Join a group buy!</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {orders.map(order => (
+                  <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 9.5, borderBottom: `1px solid ${dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)'}`, paddingBottom: 4 }}>
+                    <div style={{ display: 'flex', gap: 6, alignItems:'center' }}>
+                      <span>{order.emoji}</span>
+                      <div>
+                        <div style={{ fontWeight: 'bold', color: ink }}>{order.item.split(' ').slice(1).join(' ')}</div>
+                        <div style={{ fontSize: 8, color: muted }}>{order.date}</div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontFamily: FPX, fontSize: 5.5, color: PIK }}>🪙{order.price}</span>
+                      <div style={{ fontSize: 8, color: '#38b06c', fontWeight:'bold' }}>{order.status}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+    </div>
+  );
+}
+
+/* ── Profile / Cultural Passport (文化护照) Screen ──────────────── */
+function ProfilePassportScreen({ 
+  dark, 
+  selectedCharacter, 
+  coins, 
+  visitedSpots, 
+  passportProgress,
+  onReset 
+}) {
+  const ink = dark ? '#f0e8ff' : BLU;
+  const muted = dark ? '#7060a0' : '#8878a8';
+  
+  const categories = Object.values(passportProgress);
+  const averagePassportScore = Math.round(categories.reduce((a,b)=>a+b, 0) / categories.length);
+
+  const tier = getPlayerTier(visitedSpots.length);
+
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', background: dark ? '#0e081c' : '#f5f0ff', padding: '12px 14px 0', overflow:'hidden' }}>
+      <h3 style={{ fontFamily: FPX, fontSize: 10, color: ink, marginBottom: 10, textTransform: 'uppercase' }}>文化护照 (Passport)</h3>
+
+      <div className="scrollable" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 20 }}>
+        {/* Yueban character badge */}
+        {selectedCharacter && (
+          <div style={{
+            background: dark ? 'rgba(255,255,255,0.04)' : '#fff',
+            borderRadius: 16, padding: 10, border: `1.5px solid ${selectedCharacter.accent}30`,
+            display: 'flex', alignItems: 'center', gap: 12
+          }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 10, background: selectedCharacter.accent + '20',
+              border: `2px solid ${selectedCharacter.accent}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20, boxShadow: `3px 3px 0 ${selectedCharacter.accent}30`
+            }}>
+              {selectedCharacter.emoji}
+            </div>
+            <div>
+              <div style={{ fontFamily: FPX, fontSize: 7, color: ink }}>{selectedCharacter.name}</div>
+              <div style={{ fontSize: 9.5, color: selectedCharacter.accent, fontWeight: 'bold', marginTop: 1 }}>{selectedCharacter.heritage}</div>
+              <div style={{ fontSize: 8.5, color: muted, marginTop: 2 }}>Explorer Buddy · 阅伴</div>
+            </div>
+          </div>
+        )}
+
+        {/* Player Tier Badge (Pinduoduo/Group system) */}
+        <div style={{
+          background: dark ? 'rgba(189,61,151,0.08)' : '#fdf0fb',
+          border: `1.5px solid ${PIK}40`, borderRadius: 14, padding: 10, display: 'flex', gap: 10, alignItems: 'center'
+        }}>
+          <div style={{ fontSize: 26 }}>{tier.badge}</div>
+          <div>
+            <div style={{ fontFamily: FPX, fontSize: '6px', color: PIK }}>Ecosystem Membership Tier</div>
+            <div style={{ fontSize: 11.5, fontWeight: 'bold', color: ink, marginTop: 2 }}>{tier.name}</div>
+            <div style={{ fontSize: 8.5, color: muted, marginTop: 1 }}>Based on {visitedSpots.length}/16 stamps collected</div>
+          </div>
+        </div>
+
+        {/* Passport Stats */}
+        <div style={{ background: dark ? 'rgba(0,0,0,0.2)' : '#fff', padding: 10, borderRadius: 12, border: '1px solid rgba(0,0,0,0.05)', display:'flex', flexDirection:'column', gap: 8 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+            <span style={{ fontSize:10, color: muted, fontWeight:'bold' }}>Ecosystem Progress</span>
+            <span style={{ fontFamily: FPX, fontSize: 7, color: PIK }}>{averagePassportScore}% Completed</span>
+          </div>
+          <div className="pixel-progress-container">
+            <div className="pixel-progress-fill" style={{ width: `${averagePassportScore}%` }} />
+            <div className="pixel-progress-ticks">
+              {[...Array(10)].map((_,i)=><span key={i} />)}
+            </div>
+          </div>
+        </div>
+
+        {/* Heritage Categories Progress Bars */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, background: dark?'rgba(255,255,255,0.02)':'#fff', padding: 12, borderRadius: 12, border: '1px solid rgba(0,0,0,0.05)' }}>
+          <h5 style={{ fontFamily: FPX, fontSize: '6px', color: ink, marginBottom: 2 }}>Cultural Pillars</h5>
+          
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: muted, marginBottom: 3, fontWeight: 'bold' }}>
+              <span>🧧 Chinese Heritage (华裔)</span>
+              <span>{passportProgress.chinese}%</span>
+            </div>
+            <div className="pixel-progress-container" style={{ height: 10 }}>
+              <div className="pixel-progress-fill" style={{ width: `${passportProgress.chinese}%`, background: '#f08030' }} />
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: muted, marginBottom: 3, fontWeight: 'bold' }}>
+              <span>🕌 Malay Heritage (马来裔)</span>
+              <span>{passportProgress.malay}%</span>
+            </div>
+            <div className="pixel-progress-container" style={{ height: 10 }}>
+              <div className="pixel-progress-fill" style={{ width: `${passportProgress.malay}%`, background: '#38b06c' }} />
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: muted, marginBottom: 3, fontWeight: 'bold' }}>
+              <span>🪔 Indian Heritage (印裔)</span>
+              <span>{passportProgress.indian}%</span>
+            </div>
+            <div className="pixel-progress-container" style={{ height: 10 }}>
+              <div className="pixel-progress-fill" style={{ width: `${passportProgress.indian}%`, background: '#e85d75' }} />
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: muted, marginBottom: 3, fontWeight: 'bold' }}>
+              <span>🌺 Peranakan / Nyonya (娘惹)</span>
+              <span>{passportProgress.peranakan}%</span>
+            </div>
+            <div className="pixel-progress-container" style={{ height: 10 }}>
+              <div className="pixel-progress-fill" style={{ width: `${passportProgress.peranakan}%`, background: PIK }} />
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: muted, marginBottom: 3, fontWeight: 'bold' }}>
+              <span>🏛 Colonial & Maritime (殖民/航海)</span>
+              <span>{passportProgress.colonial}%</span>
+            </div>
+            <div className="pixel-progress-container" style={{ height: 10 }}>
+              <div className="pixel-progress-fill" style={{ width: `${passportProgress.colonial}%`, background: '#5b8de0' }} />
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection:'column', gap: 6, marginTop: 4 }}>
+          <button 
+            onClick={onReset}
+            style={{
+              background: '#d63864', color: '#fff', border: 'none', borderRadius: 10, padding: '10px',
+              fontFamily: FPX, fontSize: '6px', cursor: 'pointer', boxShadow: '0 3px 0 #9e1b3e'
+            }}
+          >
+            Reset Passport Data
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── getPlayerTier helper function ───────────────────────────────── */
+const getPlayerTier = (visitedCount) => {
+  if (visitedCount >= 12) return { name: 'Grand Master of Xia (探岛宗师)', badge: '🏆' };
+  if (visitedCount >= 8) return { name: 'Heritage Guardian (文化守护者)', badge: '🥇' };
+  if (visitedCount >= 4) return { name: 'Island Finder (寻岛家)', badge: '🥈' };
+  return { name: 'Explorer (探索者)', badge: '🥉' };
+};
+
+/* ── BottomNav Component ─────────────────────────────────────────── */
+const NAV_TABS_SG = [['🗺','Explore'],['📌','Collect'],['👤','Passport']];
+function BottomNav({ active = 0, dark, onChangeTab }) {
+  const bg = dark ? 'rgba(12,6,22,.9)' : 'rgba(255,255,255,.92)';
+  const border = dark ? 'rgba(255,255,255,.07)' : 'rgba(10,87,153,.09)';
+  return (
+    <div style={{ height:72, background:bg, borderTop:`1px solid ${border}`, backdropFilter:'blur(14px)', display:'flex', alignItems:'center', justifyContent:'space-around', flexShrink:0, padding:'0 6px', zIndex: 100 }}>
+      {NAV_TABS_SG.map(([emoji,label],i)=>(
+        <div 
+          key={i} 
+          onClick={() => onChangeTab(i)}
+          style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, flex:1, cursor: 'pointer' }}>
+          <div style={{ width:46, height:30, background:i===active?`${PIK}18`:'transparent', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, border:i===active?`1.5px solid ${PIK}40`:'1.5px solid transparent' }}>{emoji}</div>
+          <span style={{ fontFamily:FPX, fontSize:5.5, color:i===active?PIK:(dark?'#504060':'#a898c0'), letterSpacing:.3 }}>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Main App Component ──────────────────────────────────────────── */
+function App() {
+  // Startup State Engine: loading -> logo -> app
+  const [appState, setAppState] = React.useState('loading');
+  const [dark, setDark] = React.useState(() => DB.get('dark', false));
+  
+  // App virtual states
+  const [character, setCharacter] = React.useState(() => DB.get('character', null));
+  const [coins, setCoins] = React.useState(() => DB.get('coins', 47));
+  const [unlockedPins, setUnlockedPins] = React.useState(() => DB.get('unlockedPins', ['Merlion', 'Chinatown', 'Arab St', 'Gardens']));
+  const [visitedSpots, setVisitedSpots] = React.useState(() => DB.get('visitedSpots', []));
+  const [chineseTrailCheckins, setChineseTrailCheckins] = React.useState(() => DB.get('chineseTrailCheckins', []));
+  
+  // Gacha and Shop extensions
+  const [unlockedCharacters, setUnlockedCharacters] = React.useState(() => DB.get('unlockedCharacters', ['mei']));
+  const [orders, setOrders] = React.useState(() => DB.get('orders', []));
+  const [quizAnswers, setQuizAnswers] = React.useState(() => DB.get('quizAnswers', []));
+  
+  // Daily check-in coins tracker
+  const [lastCheckinDate, setLastCheckinDate] = React.useState(() => DB.get('lastCheckinDate', null));
+
+  // Cultural passport percentages
+  const [passportProgress, setPassportProgress] = React.useState(() => DB.get('passportProgress', {
+    chinese: 30,
+    malay: 60,
+    indian: 40,
+    peranakan: 80,
+    colonial: 20
+  }));
+
+  // Filtering states
+  const [selectedFeeling, setSelectedFeeling] = React.useState(null);
+  const [selectedHeritage, setSelectedHeritage] = React.useState(null);
+  const [selectedArea, setSelectedArea] = React.useState(null);
+  const [selectedAmenity, setSelectedAmenity] = React.useState(null);
+
+  // Tab views
+  const [activeTab, setActiveTab] = React.useState(0); // 0=Explore, 1=Collect, 2=Profile
+  const [activeSubTab, setActiveSubTab] = React.useState('map'); // 'map' or 'trails'
+  const [activePin, setActivePin] = React.useState(null); // active spot details
+  const [toast, setToast] = React.useState(null);
+
+  const hasCompletedTrail = chineseTrailCheckins.length === CHINESE_TRAIL_STOPS.length;
+
+  // Loader dynamic elements
+  const canvasRef = React.useRef(null);
+  const logoCanvasRef = React.useRef(null);
+  const [loadingProgress, setLoadingProgress] = React.useState(0);
+  const [tipText, setTipText] = React.useState('Loading the lion city…');
+  const [showPrompt, setShowPrompt] = React.useState(false);
+
+  // Drawing the spinning globe canvas
+  React.useEffect(() => {
+    if (appState === 'loading' && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      
+      // Draw background ocean
+      ctx.fillStyle = '#0a5799';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const cols = 72;
+      const rows = 36;
+      const tileW = 160;
+      const bandH = 80;
+      const yOffset = 40;
+      const cellW = tileW / cols;
+      const cellH = bandH / rows;
+      
+      const drawTile = (offsetX) => {
+        for (let r = 0; r < rows; r++) {
+          const row = MAP_ROWS[r];
+          for (let c = 0; c < cols; c++) {
+            if (row[c] !== '#') continue;
+            const accent = ((c * 7 + r * 13) % 47) === 0;
+            ctx.fillStyle = accent ? '#bd3d97' : '#e4eaee';
+            const x = offsetX + Math.floor(c * cellW);
+            const y = yOffset + Math.floor(r * cellH);
+            const w = Math.ceil(cellW);
+            const h = Math.ceil(cellH);
+            ctx.fillRect(x, y, w, h);
+          }
+        }
+      };
+      
+      drawTile(0);
+      drawTile(tileW);
+    }
+  }, [appState]);
+
+  // Loading progress bar simulation
+  React.useEffect(() => {
+    if (appState === 'loading') {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 10) {
+            clearInterval(interval);
+            setShowPrompt(true);
+            return 10;
+          }
+          return prev + 1;
+        });
+      }, 240);
+      return () => clearInterval(interval);
+    }
+  }, [appState]);
+
+  // Tip text rotations
+  React.useEffect(() => {
+    if (appState === 'loading') {
+      let idx = 0;
+      const interval = setInterval(() => {
+        idx = (idx + 1) % TIPS.length;
+        setTipText(TIPS[idx]);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [appState]);
+
+  // Logo Reveal Animation in stepState
+  React.useEffect(() => {
+    if (appState === 'logo' && logoCanvasRef.current) {
+      const logoCanvas = logoCanvasRef.current;
+      const lctx = logoCanvas.getContext('2d');
+      const off = document.createElement('canvas');
+      const offCtx = off.getContext('2d');
+      const W = logoCanvas.width, H = logoCanvas.height;
+      
+      const logoImg = new Image();
+      let reqId;
+      
+      logoImg.onload = () => {
+        let revealStart = performance.now();
+        const stepReveal = (now) => {
+          const t = Math.min(1, (now - revealStart) / 1100); // 1.1s reveal
+          const e = 1 - Math.pow(1 - t, 3); // easeOutCubic
+          const chunk = Math.max(1, Math.round(40 * (1 - e) + 1 * e));
+          const small = Math.max(1, Math.round(W / chunk));
+          
+          off.width = off.height = small;
+          offCtx.imageSmoothingEnabled = false;
+          offCtx.clearRect(0, 0, small, small);
+          offCtx.drawImage(logoImg, 0, 0, small, small);
+          
+          lctx.imageSmoothingEnabled = false;
+          lctx.clearRect(0, 0, W, H);
+          lctx.drawImage(off, 0, 0, W, H);
+          
+          if (t < 1) {
+            reqId = requestAnimationFrame(stepReveal);
+          }
+        };
+        reqId = requestAnimationFrame(stepReveal);
+      };
+      logoImg.onerror = () => {
+        // Fallback text if image not found
+        lctx.fillStyle = '#0a5799';
+        lctx.font = '24px "Press Start 2P"';
+        lctx.fillText('PIXEL ISLE', 50, 150);
+      };
+      logoImg.src = 'assets/pixel-isle-logo.png';
+      return () => cancelAnimationFrame(reqId);
+    }
+  }, [appState]);
+
+  // Save states side-effects
+  React.useEffect(() => {
+    DB.set('dark', dark);
+    DB.set('character', character);
+    DB.set('coins', coins);
+    DB.set('unlockedPins', unlockedPins);
+    DB.set('visitedSpots', visitedSpots);
+    DB.set('chineseTrailCheckins', chineseTrailCheckins);
+    DB.set('passportProgress', passportProgress);
+    DB.set('unlockedCharacters', unlockedCharacters);
+    DB.set('orders', orders);
+    DB.set('quizAnswers', quizAnswers);
+    DB.set('lastCheckinDate', lastCheckinDate);
+  }, [dark, character, coins, unlockedPins, visitedSpots, chineseTrailCheckins, passportProgress, unlockedCharacters, orders, quizAnswers, lastCheckinDate]);
+
+  // Sync state back from debug panel button triggers
+  React.useEffect(() => {
+    const syncFromDB = () => {
+      setDark(DB.get('dark', false));
+      setCharacter(DB.get('character', null));
+      setCoins(DB.get('coins', 47));
+      setUnlockedPins(DB.get('unlockedPins', ['Merlion', 'Chinatown', 'Arab St', 'Gardens']));
+      setVisitedSpots(DB.get('visitedSpots', []));
+      setChineseTrailCheckins(DB.get('chineseTrailCheckins', []));
+      setPassportProgress(DB.get('passportProgress', {
+        chinese: 30,
+        malay: 60,
+        indian: 40,
+        peranakan: 80,
+        colonial: 20
+      }));
+      setUnlockedCharacters(DB.get('unlockedCharacters', ['mei']));
+      setOrders(DB.get('orders', []));
+      setQuizAnswers(DB.get('quizAnswers', []));
+      setLastCheckinDate(DB.get('lastCheckinDate', null));
+    };
+
+    window.addEventListener('local-db-updated', syncFromDB);
+    return () => window.removeEventListener('local-db-updated', syncFromDB);
+  }, []);
+
+  // Toast dynamic island alert
+  const showToast = (emoji, title, text) => {
+    setToast({ emoji, title, text });
+    
+    const island = document.getElementById('island');
+    if (island) {
+      island.classList.add('expanded');
+      const textSpan = document.getElementById('islandText');
+      if (textSpan) textSpan.innerText = title;
+    }
+
+    setTimeout(() => {
+      setToast(null);
+      if (island) island.classList.remove('expanded');
+    }, 3200);
+  };
+
+  const triggerSparks = (e, count = 12) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const emojis = ['🧧', '🕌', '🪔', '🦁', '🪙', '✨'];
+
+    for (let i = 0; i < count; i++) {
+      const spark = document.createElement('span');
+      spark.className = 'checkin-spark';
+      spark.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+      spark.style.left = `${x}px`;
+      spark.style.top = `${y}px`;
+      
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 40 + Math.random() * 80;
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+      
+      spark.style.setProperty('--dx', `${dx}px`);
+      spark.style.setProperty('--dy', `${dy}px`);
+      
+      document.body.appendChild(spark);
+      setTimeout(() => spark.remove(), 800);
+    }
+  };
+
+  const handleSelectCharacter = (char) => {
+    setCharacter(char);
+    // Make sure it is added to unlocked list
+    if (!unlockedCharacters.includes(char.id)) {
+      setUnlockedCharacters([...unlockedCharacters, char.id]);
+    }
+    showToast(char.emoji, 'YUEBAN SELECT', `${char.name} is now active companion!`);
+  };
+
+  // Click handler for location pins
+  const handlePinClick = (pin) => {
+    setActivePin(pin === activePin ? null : pin);
+  };
+
+  // Spot check-in triggers passport updates
+  const handleCheckIn = (pin, e) => {
+    triggerSparks(e);
+    
+    const isFirstVisit = !visitedSpots.includes(pin.id);
+    let earnedCoins = 15;
+    
+    const nextVisited = isFirstVisit ? [...visitedSpots, pin.id] : visitedSpots;
+    setVisitedSpots(nextVisited);
+    setCoins(coins + earnedCoins);
+
+    // Increment corresponding passport categories
+    const cat = pin.heritageCategory;
+    const currentScore = passportProgress[cat] || 0;
+    const nextScore = Math.min(100, currentScore + (isFirstVisit ? 20 : 5));
+    
+    setPassportProgress({
+      ...passportProgress,
+      [cat]: nextScore
+    });
+
+    showToast(pin.emoji, 'STAMP CHECK-IN', isFirstVisit ? `Stamp Collected! +🪙${earnedCoins} · ${cat.toUpperCase()} +20%` : `Stamped again! · ${cat.toUpperCase()} +5%`);
+    window.dispatchEvent(new Event('local-db-updated'));
+  };
+
+  const handleUnlockDistrict = (pin) => {
+    if (coins < pin.cost) return;
+    setCoins(coins - pin.cost);
+    setUnlockedPins([...unlockedPins, pin.id]);
+    showToast('🔓', 'STAMP UNLOCKED', `${pin.label.split(' ')[0]} added to active passport.`);
+    window.dispatchEvent(new Event('local-db-updated'));
+  };
+
+  // Trail sub-stop check-in
+  const handleTrailCheckin = (stopId) => {
+    if (chineseTrailCheckins.includes(stopId)) return;
+    
+    const nextCheckins = [...chineseTrailCheckins, stopId];
+    setChineseTrailCheckins(nextCheckins);
+    setCoins(coins + 5);
+
+    // Increase Chinese Passport category
+    setPassportProgress({
+      ...passportProgress,
+      chinese: Math.min(100, passportProgress.chinese + 10)
+    });
+
+    if (nextCheckins.length === CHINESE_TRAIL_STOPS.length) {
+      showToast('🏮', 'TRAIL COMPLETED', 'Chinese Heritage Trail finished! Stamp badge set unlocked!');
+    } else {
+      showToast('🧧', 'TRAIL PROGRESS', 'Sub-stop verified! +🪙5 · CHINESE +10%');
+    }
+    window.dispatchEvent(new Event('local-db-updated'));
+  };
+
+  // Daily spin / coin claim
+  const handleDailyCheckin = (e) => {
+    const today = new Date().toDateString();
+    if (lastCheckinDate === today) {
+      showToast('🪙', 'DAILY CHECKED', 'You already claimed your daily coins. Come back tomorrow!');
+      return;
+    }
+    triggerSparks(e);
+    setCoins(coins + 10);
+    setLastCheckinDate(today);
+    showToast('🪙', 'DAILY BONUS', 'Claimed Daily explorer bonus: +🪙10 Coins!');
+    window.dispatchEvent(new Event('local-db-updated'));
+  };
+
+  const handleResetData = () => {
+    DB.clear();
+    setCharacter(null);
+    setCoins(47);
+    setUnlockedPins(['Merlion', 'Chinatown', 'Arab St', 'Gardens']);
+    setVisitedSpots([]);
+    setChineseTrailCheckins([]);
+    setUnlockedCharacters(['mei']);
+    setOrders([]);
+    setQuizAnswers([]);
+    setLastCheckinDate(null);
+    setPassportProgress({
+      chinese: 30,
+      malay: 60,
+      indian: 40,
+      peranakan: 80,
+      colonial: 20
+    });
+    setActiveTab(0);
+    setActivePin(null);
+    setAppState('loading');
+    setLoadingProgress(0);
+    setShowPrompt(false);
+    showToast('🔄', 'PASSPORT RESET', 'Local database returned to onboarding state.');
+    window.dispatchEvent(new Event('local-db-updated'));
+  };
+
+  const categories = Object.values(passportProgress);
+  const passportScore = Math.round(categories.reduce((a,b)=>a+b, 0) / categories.length);
+
+  return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', position:'relative' }} className={dark ? 'app-dark' : ''}>
+      
+      {/* ── STAGE 1: Spinning Globe Loader ── */}
+      {appState === 'loading' && (
+        <div className="loader-container" onClick={() => showPrompt && setAppState('logo')}>
+          <div className="loader">
+            <div className="whirl">
+              <div className="orbit orbit-a">
+                <svg viewBox="0 0 320 320">
+                  <circle className="ring" cx="160" cy="160" r="120" strokeWidth="2" strokeDasharray="3 9" opacity=".55"/>
+                </svg>
+              </div>
+              <div className="orbit orbit-b">
+                <svg viewBox="0 0 320 320">
+                  <ellipse class="ring" cx="160" cy="160" rx="130" ry="50" strokeWidth="2" strokeDasharray="2 14" opacity=".7"/>
+                </svg>
+              </div>
+              <div className="orbit orbit-c">
+                <svg viewBox="0 0 320 320">
+                  <ellipse class="ring" cx="160" cy="160" rx="50" ry="130" strokeWidth="2" strokeDasharray="2 12" opacity=".55" stroke="#0a5799"/>
+                </svg>
+              </div>
+              <div className="comet-track track-1"><div className="comet"></div></div>
+              <div className="comet-track track-2"><div class="comet b"></div></div>
+              <div className="globe">
+                <canvas ref={canvasRef} className="map" width="320" height="160"></canvas>
+                <svg className="grid" viewBox="0 0 160 160" preserveAspectRatio="none">
+                  <ellipse cx="80" cy="80" rx="80" ry="11" fill="none" stroke="#e4eaee" strokeWidth="0.8"/>
+                  <ellipse cx="80" cy="80" rx="80" ry="27" fill="none" stroke="#e4eaee" strokeWidth="0.8"/>
+                  <ellipse cx="80" cy="80" rx="80" ry="45" fill="none" stroke="#e4eaee" strokeWidth="0.8"/>
+                  <ellipse cx="80" cy="80" rx="80" ry="64" fill="none" stroke="#e4eaee" strokeWidth="0.8"/>
+                </svg>
+                <div className="shade"></div>
+              </div>
+            </div>
+            <div className="tipbar">
+              <div className="tip-badge"><span className="lantern" aria-hidden="true"></span> Tip</div>
+              <div className="tip-text" dangerouslySetInnerHTML={{ __html: tipText }}></div>
+              <div className="progress">
+                {[...Array(10)].map((_, i) => (
+                  <span key={i} className={i <= loadingProgress ? 'on' : ''}></span>
+                ))}
+              </div>
+              <div className={`prompt ${showPrompt ? 'show' : ''}`}>
+                Tap <span className="pink">screen</span> to start
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── STAGE 2: Pixel-Reveal Logo ── */}
+      {appState === 'logo' && (
+        <div className="logo-reveal-container" onClick={() => setAppState('app')}>
+          <canvas ref={logoCanvasRef} width="300" height="300"></canvas>
+          <div className="ready">Tap <span className="pink">anywhere</span> to enter</div>
+        </div>
+      )}
+
+      {/* ── STAGE 3: Main App Simulator ── */}
+      {appState === 'app' && (
+        <>
+          {/* Dynamic Toast banner overlay */}
+          <div className={`toast ${toast ? 'show' : ''}`}>
+            {toast && (
+              <>
+                <span className="toast-emoji">{toast.emoji}</span>
+                <div className="toast-body">
+                  <div className="toast-title">{toast.title}</div>
+                  <div className="toast-text">{toast.text}</div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Floating Daily coin widget */}
+          {character && (
+            <button className="floating-coin-btn" onClick={handleDailyCheckin}>
+              🪙 Daily Stamp
+            </button>
+          )}
+
+          <StatusBar dark={dark} coins={coins} passportScore={passportScore} />
+
+          <div className="screen-container">
+            
+            {/* Onboarding Screen if buddy null */}
+            {!character ? (
+              <div className="screen active scrollable">
+                <CharacterSelectScreen dark={dark} onSelectCharacter={handleSelectCharacter} />
+              </div>
+            ) : (
+              <>
+                {/* EXPLORE TAB (MAP & TRAILS) */}
+                <div className={`screen ${activeTab === 0 ? 'active' : ''}`}>
+                  <ExploreMapTab 
+                    dark={dark}
+                    coins={coins}
+                    unlockedPins={unlockedPins}
+                    visitedSpots={visitedSpots}
+                    selectedCharacter={character}
+                    onPinClick={handlePinClick}
+                    activePin={activePin}
+                    onCheckIn={handleCheckIn}
+                    onUnlockDistrict={handleUnlockDistrict}
+                    selectedFeeling={selectedFeeling}
+                    setSelectedFeeling={setSelectedFeeling}
+                    selectedHeritage={selectedHeritage}
+                    setSelectedHeritage={setSelectedHeritage}
+                    selectedArea={selectedArea}
+                    setSelectedArea={setSelectedArea}
+                    selectedAmenity={selectedAmenity}
+                    setSelectedAmenity={setSelectedAmenity}
+                    chineseTrailCheckins={chineseTrailCheckins}
+                    onTrailCheckin={handleTrailCheckin}
+                    hasCompletedTrail={hasCompletedTrail}
+                    activeSubTab={activeSubTab}
+                    setActiveSubTab={setActiveSubTab}
+                    showToast={showToast}
+                    setCoins={setCoins}
+                    quizAnswers={quizAnswers}
+                    setQuizAnswers={setQuizAnswers}
+                  />
+                </div>
+
+                {/* COLLECT BADGES, GACHA & SHOP TAB */}
+                <div className={`screen ${activeTab === 1 ? 'active' : ''}`}>
+                  <CollectBadgesScreen 
+                    dark={dark} 
+                    unlockedPins={unlockedPins} 
+                    visitedSpots={visitedSpots} 
+                    hasCompletedTrail={hasCompletedTrail}
+                    coins={coins}
+                    setCoins={setCoins}
+                    unlockedCharacters={unlockedCharacters}
+                    setUnlockedCharacters={setUnlockedCharacters}
+                    selectedCharacter={character}
+                    setSelectedCharacter={setCharacter}
+                    showToast={showToast}
+                    orders={orders}
+                    setOrders={setOrders}
+                  />
+                </div>
+
+                {/* CULTURAL PASSPORT TAB */}
+                <div className={`screen ${activeTab === 2 ? 'active' : ''}`}>
+                  <ProfilePassportScreen 
+                    dark={dark} 
+                    selectedCharacter={character} 
+                    coins={coins} 
+                    visitedSpots={visitedSpots} 
+                    passportProgress={passportProgress}
+                    onReset={handleResetData}
+                  />
+                </div>
+
+                <BottomNav active={activeTab} dark={dark} onChangeTab={(tab) => {
+                  setActiveTab(tab);
+                  if (tab !== 0) setActivePin(null);
+                }} />
+              </>
+            )}
+
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// Render the application into root node
+ReactDOM.createRoot(document.getElementById('react-root')).render(<App />);
+
+</script>
+
+<!-- Pure JS Database Console Synchronizer -->
+<script>
+  function getAppDBJSON() {
+    const db = {};
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('pixel_isle:')) {
+        const cleanKey = k.replace('pixel_isle:', '');
+        try {
+          db[cleanKey] = JSON.parse(localStorage.getItem(k));
+        } catch {
+          db[cleanKey] = localStorage.getItem(k);
+        }
+      }
+    });
+    return JSON.stringify(db, null, 2);
+  }
+
+  function updateDBConsole() {
+    const consoleEl = document.getElementById('dbConsole');
+    if (consoleEl) {
+      consoleEl.innerText = getAppDBJSON();
+    }
+  }
+
+  // Monitor updates to DB
+  window.addEventListener('local-db-updated', updateDBConsole);
+  setInterval(updateDBConsole, 1000); // Backstop poller
+
+  // Tweak database values directly
+  function tweakDB(action, arg) {
+    if (action === 'coins') {
+      const curCoins = Number(localStorage.getItem('pixel_isle:coins')) || 0;
+      localStorage.setItem('pixel_isle:coins', JSON.stringify(curCoins + arg));
+    } else if (action === 'complete_trail') {
+      localStorage.setItem('pixel_isle:chineseTrailCheckins', JSON.stringify(['ct_1', 'ct_2', 'ct_3', 'ct_4']));
+      const curProgress = JSON.parse(localStorage.getItem('pixel_isle:passportProgress') || '{}');
+      curProgress.chinese = 100;
+      localStorage.setItem('pixel_isle:passportProgress', JSON.stringify(curProgress));
+    } else if (action === 'max_passport') {
+      localStorage.setItem('pixel_isle:passportProgress', JSON.stringify({
+        chinese: 90,
+        malay: 90,
+        indian: 90,
+        peranakan: 90,
+        colonial: 90
+      }));
+    }
+    
+    // Dispatch event
+    window.dispatchEvent(new Event('local-db-updated'));
+  }
+
+  function resetAppDB() {
+    localStorage.clear();
+    window.dispatchEvent(new Event('local-db-updated'));
+  }
+
+  // Pre-populate empty db
+  if (!localStorage.getItem('pixel_isle:coins')) {
+    localStorage.setItem('pixel_isle:coins', '47');
+    localStorage.setItem('pixel_isle:unlockedPins', JSON.stringify(['Merlion', 'Chinatown', 'Arab St', 'Gardens']));
+    localStorage.setItem('pixel_isle:visitedSpots', JSON.stringify([]));
+    localStorage.setItem('pixel_isle:chineseTrailCheckins', JSON.stringify([]));
+    localStorage.setItem('pixel_isle:passportProgress', JSON.stringify({
+      chinese: 30,
+      malay: 60,
+      indian: 40,
+      peranakan: 80,
+      colonial: 20
+    }));
+  }
+  updateDBConsole();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pixel Isle — Loading</title>
+<style>
+  :root {
+    --pink: #bd3d97;
+    --grey: #e4eaee;
+    --blue: #0a5799;
+    --blue-deep: #073f72;
+    --water-hl: #1a6cb3;
+  }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--grey);
+    overflow: hidden;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    display: grid;
+    place-items: center;
+  }
+
+  /* Stage holds both loader and logo, same center.
+     cursor:pointer hints the click-to-continue affordance. */
+  .stage {
+    position: relative;
+    width: min(92vmin, 560px);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Singapore pink+blue starfield pixels drifting behind everything.
+     SVG bg with two layers at different speeds. */
+  .starfield {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .55;
+  }
+  .starfield .layer {
+    position: absolute; inset: 0;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+  }
+  .star-a {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><g fill='%23bd3d97'><rect x='12' y='30' width='2' height='2'/><rect x='14' y='32' width='2' height='2'/><rect x='10' y='32' width='2' height='2'/><rect x='12' y='34' width='2' height='2'/><rect x='12' y='32' width='2' height='2'/></g><g fill='%230a5799'><rect x='80' y='100' width='2' height='2'/><rect x='82' y='102' width='2' height='2'/><rect x='78' y='102' width='2' height='2'/><rect x='80' y='104' width='2' height='2'/><rect x='80' y='102' width='2' height='2'/></g><g fill='%23bd3d97' opacity='.7'><rect x='128' y='60' width='2' height='2'/><rect x='130' y='62' width='2' height='2'/><rect x='126' y='62' width='2' height='2'/><rect x='128' y='64' width='2' height='2'/></g></svg>");
+    animation: starDrift 60s linear infinite;
+  }
+  .star-b {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><g fill='%230a5799' opacity='.6'><rect x='40' y='40' width='2' height='2'/><rect x='42' y='42' width='2' height='2'/><rect x='38' y='42' width='2' height='2'/></g><g fill='%23bd3d97' opacity='.5'><rect x='170' y='150' width='2' height='2'/><rect x='172' y='152' width='2' height='2'/></g><g fill='%230a5799' opacity='.5'><rect x='100' y='180' width='2' height='2'/></g></svg>");
+    animation: starDrift 110s linear infinite reverse;
+  }
+  @keyframes starDrift {
+    from { background-position: 0 0; }
+    to   { background-position: 320px -240px; }
+  }
+
+  /* ------------------------------------------------------------------
+     LOADER (stage 1)
+     ------------------------------------------------------------------ */
+  .loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 38px;
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity .55s cubic-bezier(.22,1,.36,1),
+      transform .55s cubic-bezier(.22,1,.36,1);
+    z-index: 1;
+  }
+  .stage.exit .loader {
+    opacity: 0;
+    transform: scale(.6);
+    pointer-events: none;
+  }
+
+  /* Tip strip beneath the globe — game-style loading tip */
+  .tipbar {
+    width: min(86vw, 460px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+  }
+  .tip-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 8px;
+    border-radius: 4px;
+    background: var(--pink);
+    color: #fff;
+    font-family: 'Press Start 2P', ui-monospace, Menlo, monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 4px var(--pink),
+      0 6px 0 rgba(189,61,151,.25);
+    /* pixel-bevel corners */
+    image-rendering: pixelated;
+  }
+  .tip-badge .lantern {
+    width: 10px; height: 12px;
+    background:
+      /* tiny pixel lantern */
+      linear-gradient(#fff, #fff) 4px 0 / 2px 2px no-repeat,
+      linear-gradient(#fff, #fff) 3px 2px / 4px 1px no-repeat,
+      linear-gradient(#fff, #fff) 2px 3px / 6px 6px no-repeat,
+      linear-gradient(#fff, #fff) 3px 9px / 4px 1px no-repeat,
+      linear-gradient(#fff, #fff) 4px 10px / 2px 2px no-repeat;
+    background-color: transparent;
+  }
+  .tip-text {
+    min-height: 48px;
+    color: var(--blue);
+    font-family: 'Press Start 2P', ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    letter-spacing: .2px;
+    max-width: 440px;
+    text-wrap: balance;
+    transition: opacity .28s ease;
+  }
+  .tip-text.swap { opacity: 0; }
+  .tip-text b { color: var(--pink); font-weight: inherit; }
+
+  /* Pixel progress bar */
+  .progress {
+    display: flex; gap: 4px;
+    padding: 4px;
+    background: #fff;
+    box-shadow: 0 0 0 2px var(--blue);
+  }
+  .progress span {
+    width: 14px; height: 10px;
+    background: var(--grey);
+  }
+  .progress span.on { background: var(--pink); }
+
+  /* "Press any key" prompt — only visible after a beat */
+  .prompt {
+    color: var(--blue);
+    font-family: 'Press Start 2P', ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity .4s ease;
+    margin-top: -16px;
+  }
+  .prompt.show { opacity: 1; animation: blink 1.1s steps(2, end) infinite; }
+  .prompt .pink { color: var(--pink); }
+  @keyframes blink {
+    0%, 49%   { opacity: 1; }
+    50%, 100% { opacity: 0.25; }
+  }
+
+  /* Whirl rig: holds orbital rings around the globe */
+  .whirl {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    /* subtle continuous spin on the whole orbital field */
+    animation: whirlSpin 18s linear infinite;
+  }
+  @keyframes whirlSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .orbit {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .orbit svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .orbit .ring {
+    fill: none;
+    stroke: var(--pink);
+    stroke-linecap: round;
+    /* dashed arc; we animate dashoffset for the whirl */
+  }
+  .orbit-a { animation: orbitA 3.2s linear infinite; transform-origin: 50% 50%; }
+  .orbit-b { animation: orbitB 4.8s linear infinite reverse; transform-origin: 50% 50%; }
+  .orbit-c { animation: orbitC 6.5s linear infinite; transform-origin: 50% 50%; }
+  @keyframes orbitA { to { transform: rotate(360deg); } }
+  @keyframes orbitB { to { transform: rotate(360deg); } }
+  @keyframes orbitC { to { transform: rotate(360deg); } }
+
+  /* Orbiting comet dots — sit on a tilted ring and travel around it */
+  .comet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    background: var(--pink);
+    box-shadow:
+      0 0 0 2px rgba(189,61,151,.15),
+      0 0 18px rgba(189,61,151,.55);
+  }
+  .comet.b { background: var(--blue); box-shadow: 0 0 0 2px rgba(10,87,153,.15), 0 0 18px rgba(10,87,153,.55); }
+
+  .comet-track {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 50%;
+  }
+  .comet-track .comet {
+    transform: translate(120px, 0);
+  }
+  .track-1 {
+    transform: rotateX(62deg);
+    animation: trackSpin 3.2s linear infinite;
+  }
+  .track-2 {
+    transform: rotateX(62deg) rotateZ(90deg);
+    animation: trackSpin 4.8s linear infinite reverse;
+  }
+  @keyframes trackSpin { to { transform: rotateX(62deg) rotate(360deg); } }
+  /* override for track-2 to keep its initial twist */
+  .track-2 { animation-name: trackSpin2; }
+  @keyframes trackSpin2 {
+    from { transform: rotateX(62deg) rotateZ(90deg) rotate(0deg); }
+    to   { transform: rotateX(62deg) rotateZ(90deg) rotate(360deg); }
+  }
+
+  /* ---- Globe ---- */
+  .globe {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--blue);
+    box-shadow:
+      inset -18px -18px 50px rgba(0,0,0,.40),
+      inset 14px 14px 36px rgba(255,255,255,.06),
+      0 18px 50px rgba(10,87,153,.35),
+      0 0 0 1px rgba(10,87,153,.15);
+    z-index: 2;
+  }
+  /* the canvas inside the globe scrolls left to fake rotation */
+  .globe canvas.map {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 400px;   /* 2× tile */
+    height: 200px;
+    transform: translateY(-50%);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    animation: scrollMap 9s linear infinite;
+  }
+  @keyframes scrollMap {
+    from { transform: translate(0, -50%); }
+    to   { transform: translate(-200px, -50%); }
+  }
+  /* sphere shading overlay */
+  .globe .shade {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255,255,255,.22), rgba(255,255,255,0) 45%),
+      radial-gradient(circle at 70% 80%, rgba(0,0,0,.42), rgba(0,0,0,0) 55%),
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 60%, rgba(0,0,0,.25) 100%);
+    mix-blend-mode: normal;
+  }
+  /* faint latitude lines */
+  .globe .grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .18;
+  }
+
+  /* ------------------------------------------------------------------
+     LOGO (stage 2) — pixel mosaic reveal
+     ------------------------------------------------------------------ */
+  .logo {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    opacity: 0;
+    transform: scale(.96);
+    transition:
+      opacity .35s ease-out,
+      transform .9s cubic-bezier(.22,1.4,.36,1);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .stage.show-logo .logo {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+  .logo canvas {
+    width: 380px;
+    height: 380px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 14px 30px rgba(10,87,153,.18));
+  }
+  .logo .ready {
+    color: var(--blue);
+    font-family: 'Press Start 2P', ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity .4s ease .6s;
+    margin-top: 32px;
+  }
+  .stage.show-logo .logo .ready { opacity: 1; animation: blink 1.1s steps(2, end) infinite 1s; }
+  .logo .ready .pink { color: var(--pink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .whirl, .orbit-a, .orbit-b, .orbit-c,
+    .comet-track, .track-1, .track-2,
+    .globe canvas.map, .star-a, .star-b,
+    .prompt.show, .logo .ready { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<div class="starfield" aria-hidden="true">
+  <div class="layer star-a"></div>
+  <div class="layer star-b"></div>
+</div>
+
+<div class="stage" id="stage" role="button" tabindex="0" aria-label="Click to begin">
+
+  <!-- STAGE 1: LOADER -->
+  <div class="loader" id="loader">
+    <div class="whirl">
+
+      <!-- Orbital rings -->
+      <div class="orbit orbit-a">
+        <svg viewBox="0 0 320 320">
+          <circle class="ring" cx="160" cy="160" r="138"
+                  stroke-width="2"
+                  stroke-dasharray="3 9"
+                  opacity=".55"/>
+        </svg>
+      </div>
+      <div class="orbit orbit-b">
+        <svg viewBox="0 0 320 320">
+          <ellipse class="ring" cx="160" cy="160" rx="146" ry="56"
+                   stroke-width="2"
+                   stroke-dasharray="2 14"
+                   opacity=".7"/>
+        </svg>
+      </div>
+      <div class="orbit orbit-c">
+        <svg viewBox="0 0 320 320">
+          <ellipse class="ring" cx="160" cy="160" rx="56" ry="146"
+                   stroke-width="2"
+                   stroke-dasharray="2 12"
+                   opacity=".55"
+                   stroke="#0a5799"/>
+        </svg>
+      </div>
+
+      <!-- Tilted orbital tracks with traveling comets (3D look) -->
+      <div class="comet-track track-1"><div class="comet"></div></div>
+      <div class="comet-track track-2"><div class="comet b"></div></div>
+
+      <!-- Globe -->
+      <div class="globe">
+        <canvas class="map" width="400" height="200"></canvas>
+        <svg class="grid" viewBox="0 0 200 200" preserveAspectRatio="none">
+          <!-- latitude lines as horizontal ellipses (look like sphere bands) -->
+          <ellipse cx="100" cy="100" rx="100" ry="14"  fill="none" stroke="#e4eaee" stroke-width="1"/>
+          <ellipse cx="100" cy="100" rx="100" ry="34"  fill="none" stroke="#e4eaee" stroke-width="1"/>
+          <ellipse cx="100" cy="100" rx="100" ry="56"  fill="none" stroke="#e4eaee" stroke-width="1"/>
+          <ellipse cx="100" cy="100" rx="100" ry="80"  fill="none" stroke="#e4eaee" stroke-width="1"/>
+        </svg>
+        <div class="shade"></div>
+      </div>
+    </div>
+
+    <!-- Tip strip + progress + press-any-key prompt -->
+    <div class="tipbar">
+      <div class="tip-badge"><span class="lantern" aria-hidden="true"></span> Tip</div>
+      <div class="tip-text" id="tipText">Loading the lion city…</div>
+      <div class="progress" id="progress" aria-label="Loading progress">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="prompt" id="prompt">Press <span class="pink">any key</span> to begin</div>
+    </div>
+  </div>
+
+  <!-- STAGE 2: PIXEL-MOSAIC LOGO -->
+  <div class="logo" id="logo">
+    <canvas id="logoCanvas" width="380" height="380"></canvas>
+    <div class="ready">Tap <span class="pink">anywhere</span> to enter</div>
+  </div>
+
+</div>
+
+<script>
+/* =====================================================================
+   1) Build the pixel-globe map onto the .map canvas
+      Proper 2:1 equirectangular: 72 cols × 36 rows.
+      Drawn as a 200×100 band centered vertically inside the 200×200 tile —
+      cells are ~square (2.78×2.78). Top/bottom 50px stay water and read
+      as the polar regions of the sphere.
+      col = (lon + 180) / 5   row = (90 - lat) / 5
+   ===================================================================== */
+(function buildMap () {
+  // '#' = land, '.' = water. Each row = 5° latitude band.
+  const ROWS = [
+    /*  0  85-90N */ '........................................................................',
+    /*  1  80-85N */ '...........................###.........................................',
+    /*  2  75-80N */ '........#################.#######...........###############............',
+    /*  3  70-75N */ '....#####################.######......#############################....',
+    /*  4  65-70N */ '...######################.######....#################################..',
+    /*  5  60-65N */ '..######################...#####...##################################..',
+    /*  6  55-60N */ '...#######################..###...##################################...',
+    /*  7  50-55N */ '...#######################........##################################...',
+    /*  8  45-50N */ '....#####################........####################################..',
+    /*  9  40-45N */ '.....#####################......###################################.##.',
+    /* 10  35-40N */ '.....#######################....####################################..##',
+    /* 11  30-35N */ '......####################......####################################.##.',
+    /* 12  25-30N */ '........##################.....###################################.##...',
+    /* 13  20-25N */ '.............#############....####################################......',
+    /* 14  15-20N */ '..................########....###################.#####.########........',
+    /* 15  10-15N */ '...................######.....###################.#####.#######.........',
+    /* 16   5-10N */ '......................######....#################..###.########.........',
+    /* 17   0- 5N */ '......................#########..###############.......###########......',
+    /* 18   5S-eq */ '......................##########.##############........###########......',
+    /* 19  10- 5S */ '......................########...##############.........###########.....',
+    /* 20  15-10S */ '......................#########..##############.........###########.....',
+    /* 21  20-15S */ '.......................#########.############..##........###########....',
+    /* 22  25-20S */ '.......................########..###########...##..........########.....',
+    /* 23  30-25S */ '........................#######..##########....##..........########.....',
+    /* 24  35-30S */ '........................######...########..................#######.....',
+    /* 25  40-35S */ '.........................#####...######....................######......',
+    /* 26  45-40S */ '..........................###..............................####...##...',
+    /* 27  50-45S */ '..........................##.......................................##..',
+    /* 28  55-50S */ '..........................##...........................................',
+    /* 29  60-55S */ '........................................................................',
+    /* 30  65-60S */ '...........................############################################',
+    /* 31  70-65S */ '########################################################################',
+    /* 32  75-70S */ '########################################################################',
+    /* 33  80-75S */ '########################################################################',
+    /* 34  85-80S */ '########################################################################',
+    /* 35  90-85S */ '########################################################################',
+  ];
+
+  const cols = 72;
+  const rows = ROWS.length; // 36
+  // Pad/truncate to exactly 72
+  for (let i = 0; i < rows; i++) {
+    while (ROWS[i].length < cols) ROWS[i] += '.';
+    if (ROWS[i].length > cols) ROWS[i] = ROWS[i].slice(0, cols);
+  }
+
+  const canvas = document.querySelector('canvas.map');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  // Canvas is 400×200 → two horizontal 200-wide tiles for seamless scroll.
+  // Map band is 200 wide × 100 tall, vertically centered (yOffset = 50).
+  const tileW = 200;
+  const bandH = 100;
+  const yOffset = 50;
+  const cellW = tileW / cols;   // ~2.78
+  const cellH = bandH / rows;   // ~2.78  ← now square cells
+
+  const WATER   = '#0a5799';
+  const LAND    = '#e4eaee';
+  const LAND_HL = '#bd3d97';
+
+  // Fill entire canvas with water (poles + map band).
+  ctx.fillStyle = WATER;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  function drawTile (offsetX) {
+    for (let r = 0; r < rows; r++) {
+      const row = ROWS[r];
+      for (let c = 0; c < cols; c++) {
+        if (row[c] !== '#') continue;
+        const accent = ((c * 7 + r * 13) % 47) === 0;
+        ctx.fillStyle = accent ? LAND_HL : LAND;
+        const x = offsetX + Math.floor(c * cellW);
+        const y = yOffset + Math.floor(r * cellH);
+        const w = Math.ceil(cellW);
+        const h = Math.ceil(cellH);
+        ctx.fillRect(x, y, w, h);
+      }
+    }
+  }
+
+  drawTile(0);
+  drawTile(tileW);
+})();
+
+/* =====================================================================
+   2) Pixel-mosaic logo reveal
+   ===================================================================== */
+const logoCanvas = document.getElementById('logoCanvas');
+const lctx = logoCanvas.getContext('2d');
+const off = document.createElement('canvas');
+const offCtx = off.getContext('2d');
+const W = logoCanvas.width, H = logoCanvas.height;
+
+const logoImg = new Image();
+
+function easeOutCubic (t) { return 1 - Math.pow(1 - t, 3); }
+
+let revealStart = 0;
+let revealing = false;
+function startReveal () {
+  if (revealing) return;
+  revealing = true;
+  revealStart = performance.now();
+  requestAnimationFrame(stepReveal);
+}
+function stepReveal (now) {
+  const t = Math.min(1, (now - revealStart) / 1100); // 1.1s reveal
+  const e = easeOutCubic(t);
+  // chunk size in display px: 40 → 1
+  const chunk = Math.max(1, Math.round(40 * (1 - e) + 1 * e));
+  const small = Math.max(1, Math.round(W / chunk));
+  off.width = off.height = small;
+  offCtx.imageSmoothingEnabled = false;
+  offCtx.clearRect(0, 0, small, small);
+  offCtx.drawImage(logoImg, 0, 0, small, small);
+  lctx.imageSmoothingEnabled = false;
+  lctx.clearRect(0, 0, W, H);
+  lctx.drawImage(off, 0, 0, W, H);
+  if (t < 1) requestAnimationFrame(stepReveal);
+}
+
+/* =====================================================================
+   3) Tip rotation — Singaporean game-style tips. Loop until click.
+   ===================================================================== */
+const TIPS = [
+  "<b>\u62fc\u5c9b</b> means \"piece together the islands\" \u2014 collect all 64 districts.",
+  "The <b>Merlion</b> was sculpted in 1972. Half lion, half fish, all spitter.",
+  "<b>Chope a seat</b> with a tissue packet \u2014 honored island-wide since the 80s.",
+  "<b>Hawker centres</b> are UNESCO heritage. Try kaya toast at sunrise (+5 stamina).",
+  "The <b>Singapore Sling</b> was poured first at Raffles Hotel, 1915.",
+  "Singapore has <b>64+ islands</b>. Sentosa is the easy one. Pulau Ubin is the prize.",
+  "<b>Vanda Miss Joaquim</b> \u2014 the national orchid. Plant 3 to unlock the Botanic Gardens.",
+  "Catch the <b>Supertree light show</b> at 19:45 and 20:45 daily.",
+  "<b>Bukit Timah</b> peaks at 164m \u2014 the island\u2019s highest natural point.",
+  "The <b>MRT</b> covers 230km across 6 lines. Pro tip: tap-in with the back of your phone.",
+  "<b>Chili crab</b> at Newton Circus. Bring tissues. Bring more tissues.",
+  "The <b>lantern at Chinatown</b> means the festival is near. Stock up on pineapple tarts.",
+  "<b>Marina Bay Sands</b> \u2014 three towers, one sky pool, infinite skyline points.",
+  "<b>Gardens by the Bay</b> sits on 101 hectares of reclaimed land.",
+  "<b>Kopi-O kosong</b> = black coffee, no sugar. Order like a local.",
+];
+
+const tipEl = document.getElementById('tipText');
+let tipIdx = -1;
+function nextTip () {
+  tipIdx = (tipIdx + 1) % TIPS.length;
+  tipEl.classList.add('swap');
+  setTimeout(() => {
+    tipEl.innerHTML = TIPS[tipIdx];
+    tipEl.classList.remove('swap');
+  }, 220);
+}
+nextTip(); // initial
+let tipTimer = setInterval(nextTip, 3600);
+
+/* =====================================================================
+   4) Pulsing progress dots — fake but charming; loops forever.
+   ===================================================================== */
+const progressDots = [...document.querySelectorAll('#progress span')];
+let pIdx = 0;
+const pTimer = setInterval(() => {
+  progressDots.forEach((d, i) => d.classList.toggle('on', i <= pIdx));
+  pIdx = (pIdx + 1) % (progressDots.length + 2); // pause at full
+}, 220);
+
+/* =====================================================================
+   5) State machine: loader ⇄ logo, driven by click / key.
+   ===================================================================== */
+const stage = document.getElementById('stage');
+const prompt = document.getElementById('prompt');
+let state = 'loading'; // 'loading' | 'transitioning' | 'logo'
+
+// Reveal the "press any key" prompt after a beat so it doesn\u2019t look
+// like a static button — feels like the game inviting you in.
+setTimeout(() => prompt.classList.add('show'), 1400);
+
+function finishLoading () {
+  if (state !== 'loading') return;
+  state = 'transitioning';
+  clearInterval(tipTimer);
+  stage.classList.add('exit');
+  setTimeout(() => {
+    stage.classList.add('show-logo');
+    startReveal();
+    state = 'logo';
+  }, 420);
+}
+
+// After logo fully reveals, navigating to the app is optional —
+// click the logo screen to go straight to the prototype.
+function goToApp () {
+  if (state !== 'logo') return;
+  window.location.href = 'Pixel Isle App.html';
+}
+
+function restart () {
+  if (state !== 'logo') return;
+  state = 'loading';
+  stage.classList.remove('exit', 'show-logo');
+  revealing = false;
+  lctx.clearRect(0, 0, W, H);
+  // resume tips
+  tipTimer = setInterval(nextTip, 3600);
+}
+
+function onActivate () {
+  if (state === 'loading') finishLoading();
+  else if (state === 'logo') goToApp();
+}
+
+stage.addEventListener('click', onActivate);
+window.addEventListener('keydown', (e) => {
+  // any key counts; ignore modifiers-only presses
+  if (e.key === 'Tab') return;
+  onActivate();
+});
+
+/* =====================================================================
+   6) Logo image load — handlers BEFORE src, plus cached short-circuit.
+   ===================================================================== */
+logoImg.onerror = () => {
+  console.warn('Logo image missing at assets/pixel-isle-logo.png');
+};
+logoImg.src = 'assets/pixel-isle-logo.png';
+</script>
+</body>
+</html>

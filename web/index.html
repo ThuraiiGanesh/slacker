@@ -300,10 +300,11 @@
 
                             <!-- PDF Upload Zone (Rubric) -->
                             <div class="pdf-upload-zone" id="rubric-pdf-zone" onclick="document.getElementById('rubric-pdf-input').click()" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handlePdfDrop(event,'rubric')">
-                                <input type="file" id="rubric-pdf-input" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0],'rubric')">
+                                <input type="file" id="rubric-pdf-input" accept=".pdf" style="display:none" onclick="event.stopPropagation()" onchange="handlePdfFile(this.files[0],'rubric')">
                                 <div class="pdf-upload-icon">📄</div>
                                 <div class="pdf-upload-label">Upload PDF Rubric / Syllabus</div>
                                 <div class="pdf-upload-sub" id="rubric-pdf-status">Click or drag &amp; drop a .pdf file here</div>
+                                <button type="button" class="btn-secondary btn-sm" style="margin-top: 10px; pointer-events: none;">Upload doc 📤</button>
                             </div>
 
                             <textarea id="rubric-input" placeholder="Paste assignment brief, PDF contents, or grading rubric lines here... e.g.
@@ -340,10 +341,11 @@ Assignment 1 deliverables:
 
                             <!-- PDF Upload Zone (Auditor) -->
                             <div class="pdf-upload-zone" id="auditor-pdf-zone" onclick="document.getElementById('auditor-pdf-input').click()" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handlePdfDrop(event,'auditor')">
-                                <input type="file" id="auditor-pdf-input" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0],'auditor')">
+                                <input type="file" id="auditor-pdf-input" accept=".pdf" style="display:none" onclick="event.stopPropagation()" onchange="handlePdfFile(this.files[0],'auditor')">
                                 <div class="pdf-upload-icon">📄</div>
                                 <div class="pdf-upload-label">Upload PDF Draft / Report</div>
                                 <div class="pdf-upload-sub" id="auditor-pdf-status">Click or drag &amp; drop a .pdf file here</div>
+                                <button type="button" class="btn-secondary btn-sm" style="margin-top: 10px; pointer-events: none;">Upload doc 📤</button>
                             </div>
 
                             <textarea id="draft-input" placeholder="Paste your draft report, codebase description, or essay text here for immediate rubric compliance grading..."></textarea>
@@ -404,10 +406,11 @@ Assignment 1 deliverables:
                             <p class="section-desc">Paste your meeting notes or upload a PDF transcript — AI will extract decisions and action items automatically.</p>
                             <!-- PDF Upload Zone (Meeting) -->
                             <div class="pdf-upload-zone" id="meeting-pdf-zone" onclick="document.getElementById('meeting-pdf-input').click()" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handlePdfDrop(event,'meeting')">
-                                <input type="file" id="meeting-pdf-input" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0],'meeting')">
+                                <input type="file" id="meeting-pdf-input" accept=".pdf" style="display:none" onclick="event.stopPropagation()" onchange="handlePdfFile(this.files[0],'meeting')">
                                 <div class="pdf-upload-icon">📄</div>
                                 <div class="pdf-upload-label">Upload PDF Meeting Notes</div>
                                 <div class="pdf-upload-sub" id="meeting-pdf-status">Click or drag &amp; drop a .pdf file here</div>
+                                <button type="button" class="btn-secondary btn-sm" style="margin-top: 10px; pointer-events: none;">Upload doc 📤</button>
                             </div>
                             <textarea id="meeting-transcript-input" placeholder="Paste meeting notes, chat transcript, or discussion text here..."></textarea>
                             <div class="form-actions">
@@ -705,7 +708,7 @@ Assignment 1 deliverables:
         </div>
     </div>
 
-    <script src="js/app_v3.js"></script>
+    <script src="js/app_v3.js?v=3.0.2"></script>
 </body>
 </html>
 
