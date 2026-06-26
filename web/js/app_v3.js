@@ -636,20 +636,7 @@ function setupEventListeners() {
         });
     });
 
-    // Theme toggle
-    const btnThemeToggle = document.getElementById('btn-theme-toggle');
-    if (btnThemeToggle) {
-        const savedTheme = localStorage.getItem('syncup_theme') || 'dark';
-        document.body.setAttribute('data-theme', savedTheme);
-        btnThemeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
-        btnThemeToggle.addEventListener('click', () => {
-            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('syncup_theme', newTheme);
-            btnThemeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
-        });
-    }
+
 
     // My Tasks filter
     const btnMyTasksFilter = document.getElementById('btn-my-tasks-filter');

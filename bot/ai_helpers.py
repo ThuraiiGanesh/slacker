@@ -32,7 +32,7 @@ def analyze_rubric(rubric_text: str) -> list:
     )
     
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
         # Configure model to enforce JSON output
         generation_config = {
@@ -106,7 +106,7 @@ def generate_standup(messages: list) -> str:
     transcript = "\n".join([f"@{m['username'] or 'User'}: {m['text']}" for m in messages])
     
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         prompt = f"System Instruction:\n{system_prompt}\n\nChat Transcript:\n{transcript}"
         response = model.generate_content(prompt)
         return response.text.strip() if response.text else "Could not generate standup summary."
@@ -153,7 +153,7 @@ def evaluate_vibe_severity_ai(messages: list) -> bool:
     transcript = "\n".join([f"@{m['username'] or 'User'}: {m['text']}" for m in messages[-10:]])
     
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         prompt = f"System Instruction:\n{system_prompt}\n\nChat Transcript:\n{transcript}"
         response = model.generate_content(prompt)
         result = response.text.strip().upper() if response.text else "NO"
@@ -240,7 +240,7 @@ def parse_natural_language_intent(text: str) -> dict:
     )
     
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         generation_config = {
             "response_mime_type": "application/json",
             "temperature": 0.1
@@ -314,7 +314,7 @@ def audit_project_draft(draft_text: str, tasks: list) -> dict:
     )
     
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         generation_config = {
             "response_mime_type": "application/json",
             "temperature": 0.2
@@ -394,7 +394,7 @@ def chat_with_mascot(message: str, history: list) -> str:
         if not API_KEY or API_KEY == "YOUR_GEMINI_API_KEY":
             raise ValueError("GEMINI_API_KEY not configured")
         
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
         # Build prompt using chat history if available
         messages_payload = [{"role": "user", "parts": [system_prompt]}]
@@ -487,7 +487,7 @@ def generate_meeting_minutes(transcript_text: str) -> dict:
         "Do not wrap in markdown. Return raw JSON only."
     )
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         generation_config = {"response_mime_type": "application/json", "temperature": 0.2}
         prompt = f"System Instruction:\n{system_prompt}\n\nMeeting Transcript:\n{transcript_text}"
         response = model.generate_content(prompt, generation_config=generation_config)
@@ -555,7 +555,7 @@ def predict_grade_risk(tasks: list, days_until_deadline: int = 14) -> dict:
         "completion_percentage": int((completed / total * 100) if total > 0 else 0)
     }
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         generation_config = {"response_mime_type": "application/json", "temperature": 0.2}
         prompt = f"System Instruction:\n{system_prompt}\n\nProject Stats:\n{json.dumps(stats)}"
         response = model.generate_content(prompt, generation_config=generation_config)
